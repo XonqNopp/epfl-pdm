@@ -1,0 +1,30 @@
+\chapter{Conclusion}\thispagestyle{fancy}
+%%
+Building a relevant $\chi_e$ profile, we were able to run H-mode simulations. We successfully made it by taking a standard L-mode profile (i.e. parabolic) truncated at the edge to create the barrier. Moreover, to be as accurate as possible with the predictions of empirical laws, we scaled the core profile with a factor depending on the energy confinement time scaling.
+
+%% Wcore = 3.5 Wped %%
+The pedestal $\chi_e$ was scaled with the relation from \cite{andreas2010} between the core and the pedestal energies $W_{\textrm{core}} \simeq 3.5 W_{\textrm{ped}}$. Imposing this relation to determine the height of the temperature pedestal yields a good agreement with the experimental data. This link between the core and the pedestal energies has been successfully used and could be used to scale the ion thermal diffusivity as well.
+
+%% Ln = 2 LT %%
+For the density pedestal, we implemented the relation $V_n / D_n \simeq 0.5\ \nabla T_e / T_e$ that yields the relation $L_n \simeq 2 L_T$ found in eITBs \cite{fable2006} and in ASDEX Upgrade H-mode pedestal \cite{neuhauser2002}. This was achieved successfully, yielding pretty good results for the pedestal density in our simulations. Linking the pedestal density to the pedestal temperature together with the previous energy scaling was done with success, increasing our confidence in both scaling. However, when ELMs are present, it might be of interest to run a simulation with $V_n / D_n$ fixed to the steady-state $0.5\ \nabla T_e / T_e$ profile, because the density behavior may be different in the post-crash phase.
+
+%% Global ELMs %%
+About the ELM it was found that our model is not very good. The energy difference was not matching the experimental one. There was also some experimental observations that were not seen in our simulations, for instance about the central temperature. It could be due to some global confinement phenomenon. We also spoke of the possibility of a cascading phenomenon, as we saw our ELM model makes a steep pressure gradient at its border. The latter could then trigger an instability of the same kind and so on until it reaches the center. A last case discussed is that the MHD mode itself may be global and may influence the plasma further than just at the edge, maybe to the $q = 1$ radius, or even to the center.% Improving the ELM model may lead to the desired behavior and energy losses that were experimentally observed.
+
+%% j - alpha %%
+The MHD criteria have also been studied and we saw on the $j_{t,a} - \alpha$ diagram that the plasma was at its pre-crash position long before the ELM comes in the reference case, around $19ms$ for an ELM period of $20ms$. ASTRA provides a way to implement a new drawing mode; it could be interesting to make it draw the $j_{t,a}-\alpha$ diagram at the maximum of the pressure gradient and at some other chosen locations to observe in run-time the stability zone and the evolution of the plasma among the ELMs. As said just above, our ELM model has to be corrected, and this may lead to a change in the MHD stability criteria evolution.
+
+%% X3only %%
+The case with only central ECH was not significantly different. All the quantities showed a similar behavior to those of the reference case. The MHD diagram was also not really changed, unless considering the steady-state changes. The heating profile seems to have insignificant impact on the recovery behavior. However, since the confinement time is higher in the center, central heating is better than edge one and gives more energy to the plasma.
+
+%% Dn and DnVSdelta %%
+When reducing the particle diffusivity, the inter-ELM time becomes too short for the density to recover fully. It thus decreases, and so do the pressure gradient and the edge current density. The behavior of both is also slowed down. The MHD diagram showed cycles more compact, due to the slowdown of the density dynamic behavior. The density time traces, when reducing the particle diffusion coefficient, were like we had stretched them and cut them anyway after the same time. This is exactly what happens when reducing the ELM period and normalizing the abscissa. Comparing the studies when varying $D_n$ to that of reduced ELM period, these changes act in the same way on the density since they both increase the density recovery time with regards to the ELM period. 
+
+%% rhoELM %%
+We finally doubled the ELM interaction range to compare with the default case where we use the density pedestal width. ELM losses were much more important and the behavior of the plasma was radically changed. This lead to a change in the MHD diagram as well. It was found that the pedestal region during an ELM crash decreases mainly the pressure gradient, and after an ELM crash first increases the pressure gradient and decreases the normalized edge current density, then builds it up together with the pressure gradient. We also noted that the steady-state pressure gradient seems to grow much more at its maximum than at locations that are more inside the plasma but still in the pedestal.
+
+%%% Further work %%%
+In order to have a better confidence in these theoretical observations, the spatial resolution of the output of our simulations could be improved. Sawteeth are also present in H-mode plasmas and so should be in our simulations. However, their implemented model may be inaccurate and may need to be changed. Also, our ELM model uses an arbitrary value for the particle diffusion $D_n^{\textrm{ELM}}$ which should be chosen by experimental observations or theoretical assumptions.
+
+%% Implement MHD limits %%
+ELMs are MHD instabilities and we used a transport code. ASTRA has been written such that it is easy to add user-defined modules. It could be of interest to implement the ELM crash according to the MHD limits, instead of doing the crash manually, by writing a model that could be implemented in a separated module of the code as has already been done for the sawteeth \cite{fableST}. This might give us more informations.

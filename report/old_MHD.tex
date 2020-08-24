@@ -1,0 +1,182 @@
+\chapter{Magnetohydrodynamics}\label{sec:MHD}\thispagestyle{fancy}
+%% Theory preamble (no section) {{{1
+This chapter is not intended to provide a full description of the MagnetoHydroDynamics (MHD) but will only present the part that is necessary to understand this work. For further knowledge, the reader can refer to the books \cite{freidberg,freidberg2,boyd-sanderson,wesson}.
+
+The ideal MHD is based upon conservation laws, the fluid equations and Maxwell's equations \cite{freidberg}. The MHD model is focusing on the characteristic scales of the macroscopic behavior of the plasma. It can be built from the two-fluid model (described in \cite{freidberg}), reducing it to a single-fluid one and completing it with electrodynamics.
+
+The range of validity of ideal MHD is defined upon three parameters: the characteristic length, time and velocity. They are respectively defined by the plasma radius, the ion thermal transit time across the plasma and the characteristic velocity defined by the ratio of the two previous parameters. Indeed, in ideal MHD it mainly depends on the plasma radius $a$ and on the ion sound speed $v_{T_i}$ because we define the characteristic time as $\tau = a / v_{T_i}$ and the velocity $u = a / \tau = v_{T_i}$.
+
+Taking in consideration the electromagnetic quantities, it yields three conditions \cite{freidberg}:
+\begin{description}
+	\item[Length]    $a \gg r_{L,i} \gg r_{L,e} \sim \lambda_{De}$
+	\item[Frequency] $\bar{\nu}_{ei} \ll \dfrac{1}{\tau} = \dfrac{v_{T_i}}{a} \ll \omega_{c,i}$
+	\item[Velocity]  $v_{T_i} \ll v_{T_e} \ll c$
+\end{description}
+where $r_L$ is the Larmor radius, $\lambda_{De}$ the Debye length, $\bar{\nu}_{ei}$ the momentum exchange collision frequency and $\omega_c$ the cyclotronic frequency. There are some more conditions that fall from these, including that the plasma pressure has to be finite compared to the magnetic pressure, requiring $\beta = p / ( B^2 / 2 \mu_0 ) \sim 1$ \cite{freidberg}.
+
+Introducing the Alfv\'en velocity $v_A^2 = B^2 / ( \mu_o n_i m_i )$, it is approximately equal to $2 v_{T_i}^2 / \beta$, implying that the MHD characteristic timescale $\tau$ is the Alfv\'en time $\tau_A = a / v_A$ \cite{boyd-sanderson}.
+
+We introduce the single-fluid variables as the mass density $\rho$, the fluid (macroscopic) velocity $\vec{u}$ and the pressure. Since a plasma relies on quasi-neutrality meaning $n_e = n_i = n$ and ions having a much larger mass than electrons $m_i \gg m_e$, the mass density is defined as $\rho = m_i n$ and the fluid velocity as $\vec{u} = \vec{v}_i$. The pressure being not so different for the two species, the fluid pressure is simply the sum of both contributions $p = p_i + p_e$.
+
+Electrons and ions flowing in different directions, it creates a current, defined by the current density $\vec{J} = e n (\vec{v}_i - \vec{v}_e)$ which can be used to express the electron velocity as
+\begin{align*}
+	\vec{v}_e & = \vec{u} - \frac{\vec{J}}{e n}
+\end{align*}
+Using these variables in the two-fluid model, we can now write the ideal MHD equations \cite{freidberg}:
+\begin{align}
+	\textrm{Mass conservation}     && \DsDt{\rho} + \rho\ \div \vec{u}               & = 0                                     \label{eq:MHD:mass_cons}\\
+	\textrm{Momentum conservation} && \rho\ \DsDt{\vec{u}}                           & = \crossp{\vec{J}}{\vec{B}} - \grad p   \label{eq:MHD:momentum_cons}\\
+	\textrm{Ohm's law}             && \vec{E} + \crossp{\vec{u}}{\vec{B}}            & = \eta \vec{J}                          \label{eq:MHD:ohmslaw}\\
+	\textrm{Energy}                && \DsDt{} \left( \frac{p}{\rho^{\gamma}} \right) & = 0                                     \label{eq:MHD:energy_cons}\\[2mm]
+	\textrm{Maxwell}               && \begin{cases}
+											\phantom{a}\\[-12pt]
+											\curl \vec{E}\\[2pt]
+											\curl \vec{B}\\
+											\div  \vec{B}
+                                      \end{cases}\!\!\!\!\! &   \begin{array}{l}
+																	= - \dsdt{\vec{B}}\\[3pt]
+																	= \mu_0 \vec{J}\\[1pt]
+																	= 0
+																\end{array}\label{eq:MHD:maxwells}
+\end{align}
+where $\gamma = \nicefrac{5}{3}$, and the convective derivative is expressed as
+\begin{align*}
+	\DsDt{} = \DsDtexpl{}{\vec{u}}
+\end{align*}
+Treating the \textbf{ideal} MHD means we consider the plasma as an ideal conductor and therefore set $\eta = 0$, which drops the right-hand side term of \eqref{eq:MHD:ohmslaw}.
+
+What is interesting now is the behavior of such a system to a small perturbation. We now denote without index the quantities from the equilibrium and with index 1 the ones from the perturbation. Moreover we state that the equilibrium is static, meaning $\vec{v} = 0$. We define the perturbation displacement vector as $\xi$ and therefore we have $\vec{v}_1 = \dsdts{\xi}$, and every perturbed quantities can have the temporal dependence removed by a normal mode expansion $Q_1(\vec{r},t) = Q_1(\vec{r}) e^{- i \omega t}$. We can write the linear stability equations \cite{freidberg}:
+\begin{align}
+	\begin{cases}
+		\rho_1    & = - \div \left( \rho \xi \right)\\
+		p_1       & = - \xi \cdot \grad p - \gamma p \div \xi\\
+		\vec{B}_1 & = \curl \left( \crosspv{\xi}{B} \right)\\
+		\vec{J}_1 & = \dfrac{1}{\mu_0} \curl \left( \curl \left( \crosspv{\xi}{B} \right) \right)
+	\end{cases}\label{eq:MHD:lins}
+\end{align}
+This yields a single vector equation
+\begin{align}
+	\rho\ \frac{\partial^2 \xi}{\partial t^2} = \vec{F}(\xi)\label{eq:MHD:eigenval_before}
+\end{align}
+where $\vec{F}$ is a complicated operator deduced from \eqref{eq:MHD:momentum_cons} by linearizing and substituting the perturbed quantities by their meaning found in \eqref{eq:MHD:lins}.
+
+We assume that we can separate the time and space dependence of the displacement vector as $\xi(\vec{r},t) = \xi(\vec{r}) T(t)$. We choose $T(t) = e^{i \omega t}$ so that $\ddot{T} = - \omega^2 T$ and \cite{boyd-sanderson}
+\begin{align}
+	\xi(\vec{r},t) = \xi(\vec{r}) e^{i \omega t}\label{eq:MHD:xiexp}
+\end{align}
+Equation \eqref{eq:MHD:eigenval_before} then becomes
+\begin{align}
+	- \omega^2 \rho \xi = \vec{F}(\xi)\label{eq:MHD:eigenval}
+\end{align}
+The operator $\vec{F}$ is linear in $\xi$, meaning \eqref{eq:MHD:eigenval} is an eigenvalue problem \cite{boyd-sanderson}. %, where the possible values of $\omega^2$ are determined by the boundary conditions \cite{boyd-sanderson}. 
+For discrete eigenvalues, we can do a normal mode expansion with $\xi_n$ the normal mode associated to the frequency $\omega_n$ \cite{boyd-sanderson}. The general solution becomes
+\begin{align*}
+	\xi(\vec{r},t) = \sum_n \xi_n(\vec{r}) e^{i \omega_n t}
+\end{align*}
+MHD equations have no dissipative term and thus conserve energy \cite{boyd-sanderson}. A stable equilibrium configuration is then reached if the potential energy $W$ is at one of its minima. The energy principle states that the equilibrium is unstable if there exists a displacement vector $\xi$ for which $\delta W < 0$.
+
+To find this change in potential energy, we compute the change in kinetic energy
+\begin{align*}
+	K(\dot{\xi},\dot{\xi}) & = \frac{\rho}{2} \intdd{V} \dot{\xi} \cdot \dot{\xi} \stackrel{\eqref{eq:MHD:xiexp}}{=} - \frac{\rho \omega^2}{2} \intdd{V} \xi \cdot \xi \stackrel{\eqref{eq:MHD:eigenval}}{=} \frac{1}{2} \intdd{V} \xi \cdot \vec{F}(\xi)
+\end{align*}
+and hence by the energy conservation:
+\begin{align*}
+	\delta W(\xi,\xi) & = - \frac{1}{2} \intdd{V} \xi \cdot \vec{F}(\xi)
+\end{align*}
+Using the operator $K$ with $K(\dot{\xi},\dot{\xi}) = -\omega^2 K(\xi,\xi)$, we can find
+\begin{align*}
+	\omega^2 = \frac{\delta W(\xi,\xi)}{K(\xi,\xi)}
+\end{align*}
+and hence the sign of $\omega^2$ is determined by that of $\delta W$.
+
+Using the self-adjoint property of $\vec{F}$, we know that its eigenvalues are real \cite{freidberg}. Hence $\omega^2$ can be either positive or negative; a positive $\omega^2$ is linked to the oscillation case, which is stable, but a $\omega^2 < 0$ yields a solution growing exponentially, thus unstable, at a rate $\gamma = \sqrt{-\omega^2}$.
+
+%The full development can be found in \cite{freidberg,boyd-sanderson}. It leads to the conclusion that the stability is determined by the sign of the change in potential energy $\delta W$. 
+With appropriate boundary conditions we can decompose it in a plasma, a surface and a vacuum contributions \cite{boyd-sanderson}:
+\begin{align*}
+	\delta W = \delta W_P + \delta W_S + \delta W_V
+\end{align*}
+where these contributions are given by \cite{boyd-sanderson}:
+\begin{align}
+	\delta W_V & =             \int_{V} \dd V\ \frac{\left| \widetilde{\vec{B}}_1 \right|^2}{2 \mu_0}\nonumber\\
+	\delta W_S & = \frac{1}{2} \int_{S} \dd \vec{S}\ \cdot ( \vec{n} \cdot \xi )^2 \nabla \left( p + \frac{B^2}{2 \mu_0} \right)\nonumber\\
+	\delta W_P & = \frac{1}{2} \int_{P} \dd V\ \left( \frac{|\vec{B}_1|^2}{\mu_0} + \gamma\ p |\div \xi|^2 + \vec{j} \cdot ( \xi \times \vec{B}_1 ) + ( \div \xi ) ( \xi \cdot \nabla p ) \right)\label{eq:MHD:deltaWP}
+\end{align}
+where $\widetilde{\vec{B}}_1$ is a perturbation of the vacuum magnetic field, and the integral indices $V, S$ and $P$ correspond to the unperturbed vacuum volume, plasma surface and volume respectively.
+
+Introducing the field curvature $\kappa = ( \vec{b} \cdot \nabla ) \vec{b}$ where $\vec{B} = B \vec{b}$, we can rewrite each vector quantity $\vec{d}$ as a component parallel to the toroidal field $d_{\Par}$ and a perpendicular one $\vec{d}_{\perp}$ which gives the relation $\vec{d} = d_{\Par} \vec{b} + \vec{d}_{\perp}$. Hence we may rewrite the plasma contribution as \cite{boyd-sanderson}
+\begin{align}\nonumber
+	\delta W_P = \frac{1}{2} \int_{P} \dd V\ \bigg( & \frac{B_{1,\perp}^2}{\mu_0} + \frac{B^2}{\mu_0} \left( \div \xi_{\perp} + 2 \xi_{\perp} \cdot \kappa \right)^2 + \gamma\ p (\div \xi)^2\\
+												    & - 2 ( \xi_{\perp} \cdot \nabla p ) ( \kappa \cdot \xi_{\perp} ) - j_{\Par} ( \xi_{\perp} \times \vec{b} ) \cdot \vec{B}_{1,\perp} \bigg)
+	\label{eq:MHD:deltaWP2}
+\end{align}
+with $\vec{J} \simeq j_{\Par} \vec{b}$.
+
+We usually have no currents flowing on the plasma surface and thus the surface term vanishes. The $\delta W_V$ represents the perturbed magnetic vacuum energy. An ideal conducting wall near the plasma has a stabilizing effect, as it is the vacuum region that destabilizes.
+
+The plasma perturbed energy contains many terms. The two first ones are linked to the bending of the magnetic field lines. They are always positive and therefore stabilizing. The third term represents the energy needed by the plasma to be compressed, it is also a stabilizing term.
+
+The last two terms are proportional to $\vec{j}$ and $\nabla p$ and thus can be either positive or negative. If negative, instabilities will arise. There are lots of them and they can be characterized in different ways. Those caused by the pressure gradient term are often called \emph{pressure-driven} modes, while instabilities caused by the parallel currents are called \emph{current-driven} modes \cite{boyd-sanderson,freidberg}. This denomination means that those instabilities can arise even though the other destabilizing term does not act. For instance, current-driven modes can exist in the low $\beta$ limit where all the pressure-modes are stabilized. Nevertheless, we usually have both pressure gradient and current contributions together.
+%% }}}1
+%%%%%%%%%% SECTION %%%%%%%%%% {{{1 MHD stability parameters
+\section{MHD stability parameters}\label{sec:MHD:qqs}
+%%
+With coordinates $(R,\phi,z)$ and using the relation $\vec{B} = \curl \vec{A}$, we can define the \emph{poloidal flux} $\psi = R A_{\phi}$, yielding $(\vec{B} \cdot \nabla) \psi = 0$ \cite{boyd-sanderson}. This means that the poloidal flux is constant along the magnetic surfaces and therefore $\psi$ can be used as a coordinate. We can show after some algebra that surfaces of constant $\psi$ are also surfaces of constant current and of constant pressure \cite{boyd-sanderson}.
+
+We define the ratio of change of the magnetic helicity in toroidal angle to that of the poloidal angle as \cite{boyd-sanderson}
+\begin{align}
+	q & = \frac{1}{2 \pi} \oint\limits_{poloidal \atop circuit} \dd l\ \frac{B_t}{R B_p}   \label{eq:MHD:stab:q}
+\end{align}
+where $B_t$ and $B_p$ are respectively the toroidal and the poloidal magnetic field. The latter is created by the plasma current. This ratio can hence be seen as
+\begin{align*}
+	q & = \dfrac{\Delta \phi}{2 \pi}
+\end{align*}
+where $\Delta \phi$ is the change in toroidal angle for a change of $2 \pi$ in poloidal angle along a magnetic surface. If $q$ is rational, we can write $q = m / n$ where $m$ and $n$ are integers, meaning that the magnetic field lines join themselves after $m$ toroidal revolutions and $n$ poloidal ones. Hence the field lines are joining themselves after a finite number of revolutions. If we recall of \eqref{eq:MHD:xiexp}, we can also see $m$ and $n$ as the poloidal and toroidal mode number respectively \cite{gimblett2006}:
+\begin{align*}
+	\xi(\vec{r}) & = \sum_{m,n} \hat{\xi}_{m,n}(r) e^{ i ( n \phi + m \theta ) }
+\end{align*}
+$q$ has a fixed profile, but the mode number can be numerous. This means that, at a given location, we have a variety of mode numbers for a fixed $q$, linking the toroidal mode number to the poloidal one.
+
+The instabilities following the field lines, we understand that the joining of the latter will help the instabilities to grow up. Thus rational values of $q$ are dangerous for the plasma stability. This ratio $q$ is an important parameter of MHD stability and is called the \emph{safety factor}.
+
+The shear of a vector $\vec{F}$ is defined as $\nabla \vec{F}$. The magnetic shear $s$ is the shear of the safety factor. As the latter is radial and we are interested only in the radial direction, we define the magnetic shear $s = s(\rho)$ as
+\begin{align*}
+	s = \frac{\rho}{q} \ddsd{q}{\rho}
+\end{align*}
+The higher the magnetic shear, the lower the radial transport. Thus high values of the shear have a stabilizing effect on the plasma.
+%% }}}1
+%%%%%%%%%% SECTION %%%%%%%%%% {{{1 Instabilities
+\section{Instabilities}\label{sec:MHD:instab}
+%%
+Instabilities are numerous in the MHD theory. We do not intend to describe all of them in this work, but H-mode plasmas deal with some that may be recalled here.
+
+Looking at \eqref{eq:MHD:deltaWP2}, we have discussed the two last terms about their capability of destabilization. The first one concerns the pressure. If we have a pressure gradient $\grad p$ and a magnetic field curvature $\kappa$ in the same direction as the perpendicular perturbation $\xi_{\perp}$, we understand that this term will be destabilizing. Tokamaks have a curvature aimed at their center, and the pressure gradient is generally directed towards the center of the plasma. On the inner part of the tore, $\nabla p$ and $\kappa$ are aiming at different directions. But looking at the outer part, both $\nabla p$ and $\kappa$ are directed towards the center of the plasma. This yields that the destabilization-drive is mainly on the outer part and the perturbation amplitude tends to maximize these. \Hum
+
+Such perturbations are called the \emph{ballooning modes} in the $n \rightarrow \infty$ limit. The ballooning stability parameter is defined by the normalized pressure gradient
+\begin{align*}
+	\alpha = - R_0 q^2 \ddsd{\beta}{r}
+\end{align*}
+where $R_0$ is the major radius of the tokamak.
+
+%These are external modes, meaning the main destabilization comes from the vacuum between the plasma and the wall. This implies that the vacuum and surface energy differences are non-zero and must be evaluated. Suppressing this vacuum by nearing the wall would stabilize these modes.
+%%
+For finite $n$, we encounter some other modes called \emph{external kink}. These modes are more difficult to understand, but the literature provides documentation, e.g. references \cite{wesson1978,lortz1975}. Considering the second-order potential energy, the only destabilizing term is the radial gradient of toroidal current density $\dd j_t / \dd r$ \cite{wesson1978}.
+
+The origin of this term comes from the properties of the kink modes. They are incompressible and therefore need a torque to kink. The latter is provided by the $\crosspv{j}{B}$ force. The torque being the curl of the force, the gradient of current density appears in the torque, hence driving the instability. However, this term is also present in the magnetic shear, which has a stabilizing effect \cite{wesson1978}. We must ask ourselves what are the conditions for this destabilizing force to become an instability.
+
+Considering first no vacuum between the plasma and the wall, we find after some algebra that the destabilizing term in the potential energy is $j_{t,a} / \avg{j_t}$, the index $a$ referring to the edge value and $\avg{.}$ being the volume average. Thus the stability criterion in this limit is given by $j_{t,a} \le 0$. This limit case is the same when the wall is further for $m \rightarrow \infty$ modes. Looking at finite high $m$ modes, further analysis yield an additional stability criterion as
+\begin{align*}
+	\left. \dsd{j_t}{r} \right|_a = 0
+\end{align*}
+The edge current density plays an important role for these modes \cite{connor1998}. In particular the bootstrap current (see \paref{confinement:transport}) has a destabilizing effect on the external kink \cite{gimblett2006}. It is thus understandable that H-mode will often have to face them because of the pressure pedestal which implies the arising of the edge pressure gradient and thus a finite edge current density.
+
+In the H-mode regime, the most common instabilities are non-negligible. They are called edge localized modes (ELM). They are characterized by the emission of $H_{\alpha}$ radiation \cite{wesson}. They are not yet fully understood but are believed to be due to the combination of the ballooning modes and the external kink \cite{loennroth2004}.
+
+There are many types of these ELMs but we will only discuss about type-I and type-III ELMs. The main difference between these two types is the occurrence of the ELMs according to the input power. Type-I ELMs will increase their frequency with respect to the input power whereas type-III ELMs will decrease theirs. Type-I ELMs are very large ELMs and are very dangerous for the plasma facing-components due to the large energy loss ($\Delta W / W \simeq 8 - 25 \%$ \cite{andreas2010}) that go directly onto the divertors \cite{wesson}. The latter type being the most dangerous for the machine, this study is focused on them.
+
+ELMs do not have a specific stability parameter but are studied using the stability parameters of both ballooning modes and external kink, respectively $\alpha$ and $j_{t,a}$. The proper way to observe the evolution of the plasma among the ELMs is using a diagram of $j_{t,a}$ as function of $\alpha$, where we have a stability region for the plasma.
+
+Another instability often present in tokamak plasmas is the sawtooth instability. It is an internal instability and is supposed to be due to the internal kink. This mode is described by $n = 1, m = 1$. This means the $q = 1$ surface plays an important role since the instability occurs inside it. We denote the radius of this surface by $r_1$. $q = 1$ is the surface where the magnetic toroidal angle is equal to the poloidal one, joining the field lines after a single revolution of the machine only. Therefore the small instabilities are allowed to grow very much because they follow the same magnetic field line for many revolutions.
+
+In H-mode plasmas, the temperature and density profiles often give $q$ profile more flatten in the core than in L-mode. $r_1$ is thus far from the center of the plasma, which means the sawteeth will have more effect than in L-mode. The sawtooth crash can occur following many conditions. One of them concerns the magnetic shear at $r_1$, $s_1$, which should not cross a critical value $s_{\textrm{crit}}$ \cite{porcelli1996}.
+%% }}}1

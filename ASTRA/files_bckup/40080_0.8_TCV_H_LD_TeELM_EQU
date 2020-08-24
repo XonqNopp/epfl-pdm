@@ -1,0 +1,436 @@
+ !----------------------------------------------------------------------------
+ ! TCV model for interpretative eITB simulations
+ ! GI: modified to run switched shot, then sawteeth
+ ! GI: H-mode in progress...
+ !----------------------------------------------------------------------------
+
+ !----------------------------------------------------------------------------
+ !====================  Grad-Shafranov equation ==============================
+ !----------------------------------------------------------------------------
+ NEQUIL=41;            ! 3-moment equilibrium solver (ESC solver not present)
+
+ !======= GI subroutines to set the constants =======
+ ! (ZRD30X is shot number)
+ GICGEN::100::G;                                      ! Setting general constants
+ GICTE(ZRD30X,CV2)::100::T;                           ! chie profile
+ GICNE(ZRD30X,CV2)::100::N;                           ! Vn profile
+ GICELM(CSOL1,CPEL3,CSOL2,CSOL3,CSOL4,CIMP1)::100::E; ! ELM constants
+ GICFREE::100::Q;                                     ! Setting no ELM, no sawteeth and no saving
+ GICWRITESTD::100::W;                                 ! Setting standard writing for WOUTP
+!GINOW(CSOL2)::100::0;                                ! Set the ELM to occur NOW!!
+ GIGETSCAL(ZRD4,'PedScaling')::100::9;                ! Get scaling values
+ GIGETSCAL(ZRD33,'Wscaling__')::100::8;               ! Get scaling values
+ GIGETARRAY(CAR20,'1_LTe____',0)::100::7;             ! Get scaling values
+ GIGETARRAY(CAR20,'1_LTe____',1)::100::6;             ! Get scaling values
+!GIGETARRAY(CAR20,'1_LTe____',0):;                    ! Get scaling values
+ GIGETARRAY(CAR1X,'car1x____',0)::100::5;             ! Compare scaling values
+ GICSAWTOOTH(CMHD4,CF14,CF13)::100::X;                ! decrease of CMHD4 with taus
+ GICELMPHASE(CF14,CF13,CF16,CF12)::100::I;            ! Set time constants to record the ELM crash
+ !== automatic routines ==
+ GINEWELM(CSOL2,CIMP1,CSOL3):;                        ! Setting a new ELM ARG2 ms after
+ PEDSCALING(ZRD33,CV6,CV5,CF9)::CV9;                  ! Scaling for pedestal
+ WSCALING(ZRD1,ZRD4)::CV10;                           ! energy scaling for chie
+ != not used anymore
+ !GICHD::100::H;                                       ! Setting constants for HD mode
+
+
+ !- normal run
+!TAUMIN = 0.0001;                 ! Time step definiton
+!TAUMAX=.001;
+ !- HD run
+ ! Warning: WOUTP.f limits the saving resolution to 100ns
+ TAUMAX=CF13/1.d6; !MAX(CF13/1.d6,CF14/1.d6); ! CF13 us
+ TAUMIN=CF14/1.d6; !MIN(CF14/1.d6,CF13/1.d6); ! CF14 us
+ ! min and max are security to prevent taumin>taumax
+ ! Define min otherwise it takes the default 15us !!!
+
+ TAUINC = 1.1; ! Maximum increase factor for tau
+!DELVAR = 0.01;
+ DROUT  = 0.0;
+!DTOUT  = 0.5;
+ DTOUT  = TAUMAX;
+ DPOUT  = 10;
+ TINIT  = 2.2;
+ TSCALE = .025;
+!TPAUSE=0; ! can't be changed after :-(
+
+ !----------------------------------------------------------------------------
+ !====================  Ion densitiy and Impurity radiation ==================
+ !----------------------------------------------------------------------------
+ AMAIN=AMJ;    ZMAIN=ZMJ;    ! Mass & charge of main ion
+ ZEF=ZRD1X;
+ ZIM1=6;         AIM1=12;        ! 1st Impurity Z ---> Carbon
+ ZEF1=ZIM1*(ZEF-1.)/(ZIM1-1.);
+
+ PRAD=PBRAD+PSYNC;               ! Not in EF model
+
+ !----------------------------------------------------------------------------
+ !==================== Gas puff neutrals =====================================
+ !----------------------------------------------------------------------------
+
+
+ !! Cold neutrals to match the volume average from experiment
+!!NNCL=0;
+!!NNCL=10;
+!!NNCL=CF10;
+!ZRD28=CF10*NEXAV(ROC);
+!SETNAV(ZRD28,-0.01):; ! Sets NNCL to have NEAV matching NEXAV
+!!TUNEN(CF10*NEXAV(ROC),0.01):;
+!!SNEAV(CF10*NEXAV(ROC),0.1,0.01,0.002):;
+
+ !!- NEUT
+ !! No warm neutrals (maybe change for shots with CXRS)
+!NNWM=0;
+!!ENWM=0;! Ooops, code does not like this...
+ !! Energy of cold neutrals
+!!ENCL=15;
+!!ENCL=0.000025; ! [keV] 25meV=~300K
+!ENCL=0.002; ! ??? 25meV is too low, min is 2eV
+ !! Number of iterations
+!!NNCX=20; ! Default value
+ !! Call the neut sbr
+!NEUT::0.01; ! Distribution of neutrals (NN,TN)
+!SNN=SNNEU; ! Particle source for NE transport calculation (uses NNCL and NN)
+
+ ! Setting all sources to 0 makes still the density increase :-O
+ SNN=0;
+!SNEBM=0;   ! No neutral beam
+ SN=0;      ! No other sources/sinks
+
+ !----------------------------------------------------------------------------
+ !==============================  EC H&CD source =============================
+ !----------------------------------------------------------------------------
+
+!CV15=0.53; CV16=0.15; FGAUSS(CV15,CV16,CAR13):;
+!CCD3=0.50; CCD4=0.15; FGAUSS(CCD3,CCD4,CAR14):;
+!CCD2=IINT(CAR13,ROC); CCD1=IINT(CAR14,ROC);
+!CCD2=IINT(CAR13X,ROC); CCD1=IINT(CAR14X,ROC);
+
+ ! --- Current drive ---
+!CD=ZRD7X/CCD2*ZRD37X*CAR13X+(1-ZRD7X)/CCD1*ZRD38X*CAR14X; ! interp between 2 for SECCD
+!CCD1=IINT(CAR13,ROC)+1.e-6; ! total driven current, for normalization
+!CD=0.01*CCD1/CCD1*CAR13;
+ FGAUSS(0,CCD3*0.3,CAR13):; ! extra gaussian current in the center
+ CCD4=0.05; ! Total extra current in the center
+ CD=0;!CCD1*CAR6X+CCD2*CCD4*CAR13;
+!CD=CCD2*CCD4*CAR13;
+
+ !--- ECH heating with absorbed power, conserved on volum integral ---
+ ! Keep the integrated power to the absorbed power we got from TORAY
+ ! CAR4X is the absorption percentage profile [W/m^3 W]
+ ! ZRD41X is the average absorbed power from TORAY and p_gyro [MW]
+ CAR4=CAR4X*(1-XSTEP(CF5));! Cut here if you want to replace X2 by X3
+ ZRD42=VINT(CAR4,ROC);
+ ZRD43=ZRD41X/ZRD42;
+ CAR7=ZRD43*CAR4;
+ PEECR=CHE2*CAR7*(1-XSTEP(CF6));! Cut here if you want to suppress X2
+
+
+ !----------------------------------------------------------------------------
+ !=================== Heat and particles sources and sinks ===================
+ !----------------------------------------------------------------------------
+!PE=POH+PEECR-PEICL;     ! Electron power sources
+!PI=PEICL+PAION;     ! Ion power sources
+ ! For solving both TE and TI:
+ PE=POH+PEECR;     ! Electron power sources
+ PI=PAION;     ! Ion power sources
+ ! Input power
+ CAR8=POH+PEECR;
+
+ SNN=0; SN=0; !SNNEU;
+
+ !----------------------------------------------------------------------------
+ !===== Transport coefficients: Different options exist (4.2) ====
+ !----------------------------------------------------------------------------
+ ! === Options for HE, electron heat flux due to te gradient
+
+!HE=CHE3*CAR5X; ! CAR5X is HEX, CHE3 is a modulable constant (p55 manual)
+
+ !- Computation of anomalous transport coefficients
+!IFSPPL(,,,,chii_itg,chie_itg):;! Asp says ITG is not pretty good
+
+ !- Choose chie
+ !- from chie_tcv
+!CAR5=CAR5X;
+ !- automatic chie
+ CAR6=(CHI4+CNB1*(RHO/ROC)**CNB2);                                ! parabolic 'L-mode'
+ CAR9=MAX(EXP(-((CNB3-(RHO/ROC))**2)/((CHE4/2)**2)),XSTEP(CNB3)); ! gaussian centered in CNB3
+ CAR24=CHE3*(CAR6(ROC)-CHI4/2)*CAR9;                              ! amplified gaussian
+ ZRD34=MAX(ZRD33*CNB4,0.01);                       ! ZRD33 is scaling from W_core = 3.5 W_ped
+ CAR23=MAX(CAR6-CAR24,ZRD34*XSTEP(1-CHE4));        ! Smoothed chie, lower boundary
+ CAR5=MIN(CAR23,ZRD34+1000*(1-XSTEP(CNB3)));       ! and upper boundary
+
+ !- chie with step
+!CAR5=(CHI4+CNB1*(RHO/ROC)**CNB2)*(1-XSTEP(CNB3))+CNB4*XSTEP(CNB3);
+
+ !--- chi_e rescaled combined with a pedestal correction and ELMs ---
+ ZRD1=VINT(CAR8,ROC);      ! Integrated input power
+ CAR25=CHE1*ZRD4*CAR5;     ! chi_e depending of scaling (che1 is modifiable->HH)
+
+ !- ELM implementation
+ ZRD25=FJUMP(CSOL2)*(1-FJUMP(CSOL2+0.001*CSOL3));! 1 only during ELM
+ CAR16=ZRD25*XSTEP(CSOL4);
+
+ !--- chie with pedestal correction and ELM ---
+ HE=CAR25+CSOL1*CAR16;
+
+ ZRD20=RFMAX(CAR25); ! rho of max(chie) without ELM
+ ZRD21=((WI(ROC)-WI(ZRD20))+(WE(ROC)-WE(ZRD20)))/ZRD1; ! instant taue_ped
+ ZRD22=(WI(ZRD20)+WE(ZRD20))/ZRD1;                     ! instant taue_core
+
+ CAR27=TE*NE;        ! Pe = ne * Te
+ CAR26=-GRAD(CAR27)*XSTEP(CV8);  ! grad(Pe)
+ ZRD23=RFMAX(CAR26); ! rho at max(grad(p))
+
+ !=== Other transport coefficients ===
+ !--- particle flux ---
+ HN=0.0;            !particle flux due to te gradient
+ XN=0.0;         !particle flux due to ti gradient
+ ! VRAS = Ware pinch, VP = pinch velocity
+ ! CAR10X is 1/Lne_exp, comes from add1overLne.m
+
+ !- DN is HE with CPEL3 ELM
+ ZRD26=CF2*0.2*(1-ZRD25);
+ DN=ZRD26*CAR25+(0.2*CAR25+CPEL3*CAR16)*ZRD25;
+
+ !- CN - Pinch velocity?
+ ! CAR10 < 0 !!
+
+ !- ELM sets Vn to zero at pedestal, to -CPEL1 at core
+!CAR11=-MAX(CPEL1,CRAD3)*(1-XSTEP(CSOL4))*ZRD25;
+ !- ELM sets Vn/Dn to equilibrium Vn/Dn profile (from EXP file)
+ !  setting -1 to the core (output profile is less precise)
+ CAR11=(CPEL2*CAR1X*XSTEP(CRAD1)-(1-XSTEP(CRAD1))*CRAD3)*ZRD25;
+
+ !-- CN from LTe
+!CAR12=CPEL2*(0.5*GRAD(TE)/TE*GRADRO)*XSTEP(CRAD1)-(1-XSTEP(CRAD1))*CRAD3
+
+ !- From run-time parameters:
+ CAR20=0.5*GRAD(TE)/TE*GRADRO;
+ !- Constant VnDn profile:
+!CAR20=CAR1X;
+
+ CAR12=CPEL2*CAR20*XSTEP(CRAD1)-(1-XSTEP(CRAD1))*CRAD3;
+ CAR19=CAR12*(1-ZRD25);
+ !- Always CN from LTe
+!CAR10=CAR12;
+ !- ELM separated from TE:
+ CAR10=CAR19+CAR11;
+
+ ! Without Ware pinch (CF2*CAR25 is DN std)
+ CN=CF3*ZRD26*CAR25*CAR10+ZRD25*0.2*CAR25*CAR10; ! could be simplified...
+ ! With Ware pinch
+!CN=CF3*(CF2*CAR25*CAR10-VP*VRAS);
+
+
+ !--- electron heat flux terms ---
+ DE=0.0; ! chi_e due to dne
+ XE=0.0; ! chi_e due to dti 
+
+ !--- ion heat flux terms ---
+ DI=0.0; ! ion heat flux due to dne 
+ HI=0.0; ! ion heat flux due to dte
+ CI=0.0; ! additional ion heat flux term
+ ! CAR18 is HE without ELM
+ CAR18=CHI1*CAR25;
+!XI=CHI2*(CAR18+HNASC); ! chi_i due to dti. (HNASC=Angioni-Sauter neoclassical conductivity)
+!XI=CHI2*(CAR18+HNASI); ! chi_i due to dti. (Neoclassical Angioni-Sauter Ion)
+ !- chi_i plus ELM
+ XI=CHI2*(CAR18+HNASI+CSOL1*CAR16);
+!XI=HE;
+
+ !----------------------------------------------------------------------------
+ !======================  Transport equations ================================
+ !----------------------------------------------------------------------------
+
+ !=== Density ===
+ NE=NEX; ! specify from file
+!NE:EQ;    NE=NEX;        NEB=NEXB; ! solve with initial conditions set to NEX
+
+ !=== Electron Temperature ===
+!TE=TEX; ! specify from file
+ TE*:EQ;   TE=TEX/ZRD40X; TEB=TEXB; ! solve with initial conditions set to TEX/ZRD40X
+
+ !=== Ion Temperature ===
+!TI=TIX; ! Specify from file
+ TI*:EQ;   TI=TIX; ! solve with initial conditions set to TIX
+ TIB=TIXB;
+!TIB=TEXB;
+ ! TIXB is fixed for the whole simulation, therefore be careful to what you put...
+
+
+ !----------------------------------------------------------------------------
+ !====================  Poloidal field equation ==============================
+ !----------------------------------------------------------------------------
+
+ ! === Bootstrap current coefficients===
+!CAR31=max(0,-DCSA*GRAD(NE)/NE-HCSA*GRAD(TE)/TE-XCSA*GRAD(TI)/TI);
+!HC=CIMP3*HCSA*CAR31/(-DCSA*GRAD(NE)/NE-HCSA*GRAD(TE)/TE-XCSA*GRAD(TI)/TI+1.e-6); 
+!DC=CIMP3*DCSA*CAR31/(-DCSA*GRAD(NE)/NE-HCSA*GRAD(TE)/TE-XCSA*GRAD(TI)/TI+1.e-6); 
+!XC=CIMP3*XCSA*CAR31/(-DCSA*GRAD(NE)/NE-HCSA*GRAD(TE)/TE-XCSA*GRAD(TI)/TI+1.e-6); 
+ HC=CFUS4*HCSA; DC=CFUS4*DCSA; XC=CFUS4*XCSA;    ! Bootstrap due to Sauter-Angioni
+
+ ! === CC: Conductivity ===
+ CC=CNSA;
+ 
+ ! === Initial condition (4.3.2) ===
+ MU=MUX;
+
+ ! === Boundary condition (4.4.2) ===
+ IPL=CF1*IPLX; ! plasma current
+!LEXT=1; ! external inductance in uH, may then define UEXT
+!UEXT=CF4;
+!UEXT=ZRD16X;
+
+ ! === Calculation method specification ===
+ CU:EQ;         ! Solve
+
+ !----------------------------------------------------------------------------
+ !====================  Auxiliary quantities =================================
+ !----------------------------------------------------------------------------
+ CF11=ABS((FRMIN(UPL)-FRMAX(UPL))/FRMIN(UPL));  !Steady-stateness factor
+ ZRD14=FRMAX(MU); ! maximum mu (minimum q)
+
+ CAR1=TAUEE;  ! Electron energy confinement time  -> woutp
+ CAR2=TAUEI;  ! Ion energy confinement time       -> woutp
+ CAR3=HNASC;  ! Particle confinement time         -> woutp
+ CAR21=LINT;  ! Internal inductance               -> woutp
+ CAR28=FTLLM; ! Trapped particle fraction         -> woutp
+
+ !----------------------------------------------------------------------------
+ !==========================  Print out data =================================
+ !----------------------------------------------------------------------------
+ !WOUTP:.1:::S; ! Write data with given time interval (0.1s)
+ ! Warning: to run full HD, watch the parameters TAUMIN and TAUMAX at lines 15 and after!!
+ ZRD15=MAX(CF15,TAUMAX);
+ WOUTP:ZRD15:CF16:CF12:S;! HD
+
+
+ !----------------------------------------------------------------------------
+ !=========================  Sawteeth ========================================
+ !----------------------------------------------------------------------------
+!ASTSAW(1,CMHD3,CMHD1,CMHD4,CMHD2)::CRF1::; ! waiting CRF1 s for a good equilibrium
+ ZRD11=RFVAL(MU,1.);
+
+ !----------------------------------------------------------------------------
+ !====================== Radial E field ======================================
+ !----------------------------------------------------------------------------
+ ! Found in manual: ER=BTOR*(FRS*MU*VTOR/RTOR+VDIA-VPOL);! Must find out what are all these...
+ ! Lines from AK
+!VPOL=VPSWW; !Poloidal rotation neocl.
+!VTOR=VTORX; !Toroidal rotation from exp (not in my exp file...)
+!ER=BTOR*(VDIA-VPOL+AMETR*MU*VTOR/RTOR); ! From AK
+
+
+ !------------------------------------------------------------------------
+ !------------------------------------------------------------------------
+ !======================  Radial output ==================================
+ !------------------------------------------------------------------------
+
+ ! No 0 1 2 3 4 5
+ !  1   x       x
+ !  2 x x
+ !  3
+ !  4 x
+ !  5   x       x
+ !  6   x
+ !  7     x
+ !  8
+ !  9     x
+
+ !- Pag1
+ Te\TE\\TEX\-15;         ne\NE\\NEX\-02;       Johm\CU-CUBS-CD\-04;         Pech\PEECR\\CAR4X;
+ Chie\HE\-12;            q\1./MU\-11;          Jcd\CD\-04;                  Qe\QE\-16;
+
+ Ti\TI\\TIX\-15;         ni\NI\-02;            Jpar\CU\-04;                 Jcd\CD\-04;
+ Xi\XI\-12;              shir\SHEAR\-11;       Jbs\CUBS\-04;                Qi\QI\-16;
+
+ !- Pag2
+ Jcd\CD\-04;             Jtor\CUTOR\-04;       Utor\UPL\-27;                Ware\CN;
+ coef\CFUS1\\CFUS2\-29;  Dn\DN;                rhos\RHOS;                   nu\NUES;
+
+ gamm\"work(j,10)";      Vpol\VPOL;            Upar\ULON\ECR-27;            Er\ER;
+ XIan\CAR18\-29;         \;                    Qn\QN;                       psi\FP;
+
+ !- Pag3
+ Johm\CUOHM\-04;         taue\TAUEE;           AnEq\"work(j,7)";            de\-DE;
+ we\WE;                  Pohm\POH;             cc\CC;                       f\FTLLM;
+
+ grdr\GRADRO;            g11\G11;              Eq\PEICL+CMHD1*"work(j,7)";  iLTi\1./LTI\50;
+ lint\LINT;              ipol\IPOL;            \;                           iLTe\1./LTE\50;
+
+ !- Pag4
+ Bmax\BMAXT;             aa\AMETR\\CAR9X\-43;  EqEn\PEICL;                  nue\NUES;
+ nuee\NUEE;              \;                    dTe\ABS(TE-TEX)/TEX*100;     Bdb0\BDB0;
+
+!\;                      \;                    \;                           \;
+ itot\5.*G22*BTOR*IPOL*RHO*MU/RTOR; c6\CAR6\-44; c5\CAR5\-44;               \;
+ P\CAR27;                gP\CAR26;              \;                           \;
+
+ !- Pag5 (needed for other plots)
+ Dn\DN;                  Vp\VP\1;              ne\NE\\NEX\-02;              Te\TE\\TEX;
+ \;                      Ware\VP*VRAS\1;       V\VOLUM;                     VnDn\ABS(CN/DN)\-51;
+
+ Vn\CN;                  Vras\VRAS\1;          ni\NI\-02;                   chie\HE; 
+!Qn2\G11*NE*(CN-DN*GRAD(NE)/NE)\-55;
+ \;                      \;                    nn\NN;                       *lne\ABS(CAR10)\\ABS(CAR1X)\-51;
+
+ !------------------------------------------------------------------------
+ !=======================  Time output ===================================
+ !------------------------------------------------------------------------
+ !Warning: name is limited to 4 characters, width is 16 quantitites
+ ! 8 quantities at a time are used for the time plot
+ Te0_TE(0)_-101;
+ TeX0_TEX(0)_-101;
+ Ti0_TI(0)_-101;
+ Tib_TIB_-101;
+ ne0_NE(0)_-102;
+ neX0_NEX(0)_-102;
+ <ne>_NEAV(ROC)_-106;
+ <nx>_NEXAV(ROC)_-106;
+!neb_NEB_-102;
+ Joh0_CU(0)-CUBS(0)-CD(0)_-103;
+ q0_1/MU(0)_-104;
+ qa_1/MU(ROC)_-104;
+!qmin_1/FRMAX(MU)_-104;
+!rqin_RFMAX(MU);
+!QeB_QEB;
+!Zef_ZEF(0);
+ Ipl_IPL_-103;
+ Icd_ICD(ROC)_-103;
+ Ibs_IBS(ROC)_-103;
+ Iohm_IOHM(ROC)_-103;
+ Itot_ICD(ROC)+IBS(ROC)+IOHM(ROC)_-103;
+!AnEq_VINT("work(j,7)",ROC);
+!tauG_TAUEE(ROC);
+!NPe_VINT(NE,ROC);
+!We_WE(ROC);
+!abc_AMETR(ROC);
+!abct_CAR9X(ROC);
+!stst_CF11;
+
+!scaP_ZRD33;
+!nCN_NNCL;
+!taue_1000*ZRD3_-107;
+!tCor_1000*ZRD22_-107;
+!tPed_1000*ZRD21_-107;
+!%Cor_100*ZRD22/ZRD3_-108;
+!%Ped_100*ZRD21/ZRD3_-108;
+
+ rXGP_ZRD23/ROC;
+ nXGP_NE(ZRD23);
+ TXGP_TE(ZRD23);
+ pXGP_CAR27(ZRD23);
+ qXGP_1/MU(ZRD23);
+ tiGP_TI(ZRD23);
+
+ roq1_ZRD11/ROC; ! rho(q=1)
+ s1_SHEAR(ZRD11);
+
+ Ech_VINT(PEECR,ROC)_-105;
+ z41_ZRD41X_-105; ! = ECH
+ Vlup_UPL(ROC);
+ scal_ZRD4;
+ sclP_ZRD33;
+ minP_ZRD34;
+ !-------------------------------------------------------------------------------------------------

@@ -1,0 +1,471 @@
+%%
+%%% Headers %%% {{{1
+\documentclass[12pt,twoside,a4paper,openright]{report}
+%\documentclass[draft,12pt,twoside,a4paper,openright]{report}
+%\newcommand{\Hum}{}
+\newcommand{\Hum}{\Red{hum hum}\ }
+%%
+%\newcommand{\Hem}{\Yellow{hem hem}\ }
+%\newcommand{\Pics}{\Green{Picture needed}\ }
+%% {{{2 Variables definition
+\newcommand{\Gael}{Ga\"el Induni}
+\newcommand{\thisTitle}{Theoretical study of electronic transport in TCV ELMy H-mode}
+\newcommand{\thisTitleBis}{Theoretical study of electronic transport in\\[0.4cm] TCV ELMy H-mode}
+%% }}}2
+%%
+%%% Usepackages %%% {{{2
+%%
+%% Graphics and figures %% {{{3
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{subfig,caption,keyval}
+\captionsetup{justification=centering}
+%\usepackage{xypic}
+%% }}}3
+%% Math %% {{{3
+\usepackage{amsmath}
+\usepackage{amssymb}
+%\usepackage{cancel}
+%% }}}3
+%% Programming %% {{{3
+\usepackage{listings}
+%\renewcommand{\thelstlisting}{\arabic{section}.\arabic{lstlisting}}
+\lstloadlanguages{matlab,Fortran}
+\lstdefinestyle{fortran}{
+    language        = Fortran,
+    numbers         = left,
+    numberstyle     = \tiny,
+    basicstyle      = \small,
+	alsoletter      = {.},
+	morekeywords    = {.eq.,.ne.,.gt.,.ge.,.lt.,.le.,.and.,.or.,.true.,.false.},
+    keywordstyle    = \bfseries\color{blue},
+    identifierstyle = ,
+    commentstyle    = \color{red},
+    stringstyle     = \color{green},
+    showstringspaces= false,
+    showspaces      = false,
+    frame           = single,
+    tabsize         = 2,
+    breaklines      = true
+}
+\lstdefinestyle{matlab}{
+    language=Matlab,
+    numbers=left,
+    numberstyle=\tiny,
+    basicstyle=\small,
+    keywordstyle=\bfseries,
+    identifierstyle=,
+    commentstyle=\color{blue},
+    stringstyle=,
+    showstringspaces=false,
+    showspaces=false,
+    frame=single,
+    breaklines=true
+}
+%% }}}3
+%% Page display %% {{{3
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+%\usepackage[pagebackref]{hyperref}
+%\usepackage{multicol}% Remember environement is multicols{n}
+%% }}}3
+%% Tables %% {{{3
+\usepackage{longtable}
+\usepackage{multirow}
+%\usepackage{colortbl}
+%\usepackage{spreadtab}
+%\usepackage{numprint}
+%% }}}3
+%% Bibliography %% {{{3
+%\usepackage{doi}
+\usepackage[nottoc,chapter]{tocbibind}
+\usepackage[nomove,nospace,nobreak]{cite}% superscript
+\usepackage[hyperpageref]{backref}
+\renewcommand*{\backref}[1]{} 
+\renewcommand*{\backrefalt}[4]{
+	\ifcase #1
+		Not cited.
+	\or
+		Cited on page~#2.
+	\else
+		Cited on pages~#2.
+	\fi
+}
+%\renewcommand*{\backrefalt}[4]{
+	%\ifcase #1
+		%Not cited.
+	%\or
+		%\ifcase #3
+		%\or
+			%Cited on page~#2.
+		%\else
+			%#3 citations on page~#2.
+		%\fi
+	%\else
+		%#3 citations on pages~#2.
+	%\fi
+%}
+%\usepackage{citeref}
+%% }}}3
+%% Miscellaneous %% {{{3
+%\usepackage{alltt}
+\usepackage{color}
+%\usepackage{everysel,ragged2e}
+%\usepackage{gensymb}
+%\usepackage{marvosym}
+\usepackage{nicefrac}
+%% }}}3
+\usepackage[english]{babel}
+%% hypersetup {{{3
+\hypersetup{
+	colorlinks        = false,
+	bookmarks         = true,
+	bookmarksnumbered = true,
+	linkcolor         = red,
+	urlcolor          = blue,
+	filecolor         = blue,
+	citecolor         = green,
+	hyperfigures      = true,
+	breaklinks        = true,
+	ps2pdf,
+	pdfinfo           = {
+		title           = {\thisTitle},
+		author          = {\Gael},
+		subject         = {\thisTitle},
+		displaydoctitle = true,
+		keywords        = {plasma} {transport} {diffusion} {H-mode} {pedestal} {ELM} {MHD} {ASTRA} {simulation}
+	}
+}
+\newcommand{\mail}[1]{\href{mailto:#1}{#1}}
+\newcommand{\ftplink}[1]{\href{ftp://#1}{#1}}
+\newcommand{\myurl}[1]{\href{#1}{#1}}
+%% }}}3
+%% For my AllFigs environment {{{3
+\usepackage{substr}
+\usepackage{ifthen}
+\usepackage{fixltx2e}
+\MakeRobust{\BehindSubString}
+\MakeRobust{\BeforeSubString}
+\usepackage{tokenizer}
+%% }}}3
+%%% End of usepackages %%% }}}2
+%%
+%%% Document size %%% {{{2
+%%
+\setlength{\topmargin}{-1.25cm}
+\setlength{\textheight}{24.5cm}
+\setlength{\hoffset}{-1cm}
+\setlength{\textwidth}{17cm}
+\setlength{\evensidemargin}{0.38cm}
+%%
+%%% End of document size %%% }}}2
+%%
+%%% Fancy %%% {{{2
+%%
+\pagestyle{fancy}
+\fancyhead[LO,RE]{\Gael}
+\chead{}
+\fancyhead[RO]{\thisTitle}
+\fancyhead[LE]{\nouppercase{\leftmark}}
+\fancyfoot[LO,RE]{\footnotesize \includegraphics[width=1cm]{../pics/EPFLno.eps} \includegraphics[width=5mm]{../pics/CRPP_Logo.eps} CRPP-EPFL}
+\cfoot{}
+\fancyfoot[RO,LE]{\thepage}
+%%
+%%% End of fancy %%% }}}2
+%%
+%%% Renewing some commands %%% {{{2
+%%
+%% Ruler for footer and header
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+%% Variable that defines where to put floats
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}% < topfraction
+%%
+%%% End of renrewing commands %%% }}}2
+%%
+%%% New commands %%% {{{2
+%%
+\newcommand{\Figref}[1]{Fig.~\ref{fig:#1}}
+\newcommand{\figref}[1]{fig.~\ref{fig:#1}}
+\newcommand{\Figsref}[1]{Figs.~\ref{fig:#1}}
+\newcommand{\figsref}[1]{figs.~\ref{fig:#1}}
+\newcommand{\figres}[1]{fig.~\ref{fig:results:#1}}
+\newcommand{\tabref}[1]{Tab.~\ref{tab:#1}}
+\newcommand{\paref}[1]{\S\ref{sec:#1}}
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\newcommand{\mat}[1]{\underline{\underline{#1}} }
+\newcommand{\Rey}{\mathcal{R}e}
+\newcommand{\alali}{\\ \hline}
+\newcommand{\dd}{\textrm{d}}
+\newcommand{\intdd}[1]{\int\dd #1\ }
+\newcommand{\intddlim}[2]{\int\limits_{#2}\dd #1\ }
+\newcommand{\intddlims}[3]{\int\limits_{#2}^{#3}\dd #1\ }
+\newcommand{\bra}[1]{\left\langle #1\ \right|}
+\newcommand{\ket}[1]{\left|\ #1 \right\rangle}
+\newcommand{\braket}[2]{\left\langle #1\ |\ #2 \right>}
+\newcommand{\ketbra}[2]{\left|\ #1 \rangle\langle #2\ \right|}
+\newcommand{\avg}[1]{\left\langle #1 \right\rangle}
+\newcommand{\grad}{\nabla}
+\renewcommand{\div}{\grad \cdot}
+\newcommand{\curl}{\grad \times}
+\newcommand{\crossp}[2]{#1 \times #2}
+\newcommand{\crosspv}[2]{\vec{#1} \times \vec{#2}}
+\newcommand{\dsd}[2]{\dfrac{\partial #1}{\partial #2}}
+\newcommand{\dsds}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\ddsd}[2]{\dfrac{\dd #1}{\dd #2}}
+\newcommand{\ddsds}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\dsdt}[1]{\dsd{#1}{t}}
+\newcommand{\dsdts}[1]{\dsds{#1}{t}}
+\newcommand{\ddsdt}[1]{\ddsd{#1}{t}}
+\newcommand{\ddsdts}[1]{\ddsds{#1}{t}}
+\newcommand{\DsDtexpl}[2]{\dsdt{#1} + ( #2 \cdot \grad ) #1}
+\newcommand{\DsDt}[1]{\dfrac{D #1}{D t}}
+\renewcommand{\epsilon}{\varepsilon}
+\renewcommand{\approx}{\simeq}
+\renewcommand{\roman}{\Roman}
+\makeatletter
+\newcommand{\Rom}[1]{\expandafter\@slowromancap\romannumeral #1@}
+\makeatother
+\newcommand{\Yellow}[1]{\colorbox{yellow}{#1}}
+\newcommand{\Green}[1]{\colorbox{green}{#1}}
+\newcommand{\Red}[1]{\colorbox{red}{#1}}
+\newcommand{\Blue}[1]{\colorbox{blue}{#1}}
+\newcommand{\Par}{/\!/}
+%%
+%% New commands for figs environments {{{3
+\newcommand{\resultsplot}[4]{\subfloat[]{\includegraphics[width=7cm]{../matlab/pics/40080_0.8_#4_#3_results_#1.eps}\label{fig:results:ELMs:#1:#2:#4}} }
+\newcommand{\resultsplotO}[1]{\subfloat[]{\includegraphics[width=7cm]{../matlab/pics/40080_0.8_#1_results_cycle.eps}\label{fig:results:ELMs:cycle:#1}} }
+\newcommand{\rhosOKplot}[2]{\subfloat[]{\includegraphics[width=7cm]{../matlab/pics/40080_0.8_#2_rhosOK_#1.eps}\label{fig:results:ELMs:rhosOK:#1:#2}} }
+%% }}}3
+%% AllFigs {{{3
+\newcounter{maxFigs}
+\newcounter{coFigs}
+\newcounter{KeepSubFig}
+\newcommand{\Argv}{}
+\newcommand{\tmpArgv}{}
+\newcommand{\tmpArgvBis}{}
+\newcommand{\thisArg}{}
+\newcommand{\ParsChar}{,}
+\newcommand{\PutLabel}{}
+\newcommand{\InLabel}{}
+\newcommand{\Plural}{s}
+\newcommand{\Grammar}{}
+\newcommand{\GrammarVerb}{are}
+\newcommand{\ResultsComment}{ The left figure\Plural\ show\Grammar\ the traces at the top of the density pedestal while the right one\Plural\ \GrammarVerb\ at the maximum of the pressure gradient.}
+\newcommand{\TheCap}{}
+%% 1: case, 2: fig position, 3: , 4: quantities to display, 5: continued, 6: candidate (resultplot/resultplotO/rhosOKplot), 7: caption
+\newenvironment{AllFigs}[7]{
+	\renewcommand{\Argv}{#4}
+	\renewcommand{\thisArg}{}
+	\IfSubStringInString{\ParsChar}{\Argv}{%
+		\SubStringsToCounter{maxFigs}{\ParsChar}{\Argv}%
+		\addtocounter{maxFigs}{2}%
+	}{%
+		\setcounter{maxFigs}{2}%
+	}
+	\setcounter{coFigs}{1}
+	\ifthenelse{\equal{#5}{y}}{%
+		\setcounter{subfigure}{\theKeepSubFig}%
+	}{}
+	\begin{figure}[#2]
+	\begin{center}
+	\ifthenelse{\equal{#5}{y}}{\ContinuedFloat}{}
+	\whiledo{\thecoFigs < \themaxFigs}{
+		\IfSubStringInString{\ParsChar}{\Argv}{%
+			\let\tmpArgv\Argv
+			\GetTokens{thisArg}{Argv}{\tmpArgv}
+		}{%
+			\renewcommand{\thisArg}{\Argv}%
+		}
+		\ifthenelse{\equal{#6}{resultsplotO}}{%
+			\resultsplotO{\thisArg}%
+			\ifthenelse{\equal{\Argv}{\thisArg}}{}{%
+				\ifthenelse{ \isodd{\thecoFigs}}{\hspace{2mm}}{\linebreak}%
+			}
+		}{%
+			\ifthenelse{\equal{#6}{resultsplot}}{%
+				\ifthenelse{\equal{\thisArg}{ibsped}}{%
+					\resultsplot{#1}{ped}{0.860}{\thisArg}
+				}{%
+					\resultsplot{#1}{core}{0.754}{\thisArg}\hspace{2mm}
+					\resultsplot{#1}{ped}{0.860}{\thisArg}
+				}
+				\ifthenelse{\equal{\thisArg}{\Argv}}{}{\linebreak}%
+			}{%
+				\rhosOKplot{#1}{\thisArg}
+				\ifthenelse{\equal{\Argv}{\thisArg}}{}{%
+					\ifthenelse{ \isodd{\thecoFigs}}{\hspace{2mm}}{\linebreak}%
+				}
+			}%
+		}
+		\stepcounter{coFigs}
+	}
+	\vspace{-6mm}
+	\end{center}
+	% label
+	\ifthenelse{\equal{#5}{y}}{
+		\renewcommand{\InLabel}{none}%
+	}{%
+		\ifthenelse{\equal{#6}{resultsplotO}}{%
+			% cycle
+			\renewcommand{\InLabel}{cycle}
+		}{%
+			\ifthenelse{\equal{#6}{resultsplot}}{%
+				% results
+				\renewcommand{\InLabel}{#1}
+			}{%
+				% rhosOK
+				\renewcommand{\InLabel}{rhosOK:#1}
+			}%
+		}
+	}
+	\ifthenelse{\equal{#5}{a}}{%
+		\let\tmpInLab\InLabel%
+		\renewcommand{\InLabel}{\tmpInLab:app}%
+	}{}
+	\ifthenelse{\equal{\InLabel}{none}}{%
+		\renewcommand{\PutLabel}{}
+	}{%
+		\renewcommand{\PutLabel}{\label{fig:results:ELMs:\InLabel}}
+	}
+	% Caption
+	\renewcommand{\TheCap}{#7}
+	\ifthenelse{\equal{#6}{resultsplot}}{%
+		\ifcase \themaxFigs
+		\or \or
+			\renewcommand{\Plural}{}
+			\renewcommand{\Grammar}{s}
+			\renewcommand{\GrammarVerb}{is}
+		\else
+			\renewcommand{\Plural}{s}
+			\renewcommand{\Grammar}{}
+			\renewcommand{\GrammarVerb}{are}
+		\fi
+		\renewcommand{\TheCap}{#7\ResultsComment}
+	}{}
+	\caption{\footnotesize \TheCap\PutLabel}
+	%\caption{\footnotesize #7 (Colors in the electronic version.)\PutLabel}
+	\vspace{-5mm}
+	\end{figure}
+}{
+	\ifthenelse{\arabic{subfigure} > 0}{%
+		\setcounter{KeepSubFig}{\arabic{subfigure}}%
+		\setcounter{subfigure}{0}%
+	}{}
+}
+%% }}}3
+%% New commands for references {{{3
+\newcommand{\AllFigsRef}[1]{\ref{fig:results:ELMs:#1}}
+\newcommand{\AllFigsRefO}[1]{\ref{fig:results:ELMs:cycle#1}}
+\newcommand{\AllProfsRef}[1]{\ref{fig:results:ELMs:rhosOK:#1}}
+\newcommand{\AllFigsSub}[1]{\subref*{fig:results:ELMs:#1}}
+\newcommand{\AllFigsSubO}[1]{\subref*{fig:results:ELMs:cycle:#1}}
+\newcommand{\AllProfsSub}[1]{\subref*{fig:results:ELMs:rhosOK:#1}}
+%% }}}3
+%%
+%%% End of new commands %%% }}}2
+\input{variables.tex}
+%%
+\setcounter{tocdepth}{1}
+\numberwithin{equation}{chapter}
+%% }}}1
+%%
+\begin{document}
+%%
+%%% Title page %%% {{{1
+%%
+\pagestyle{empty}
+\renewcommand{\thepage}{\alph{page}}
+\begin{titlepage}
+%\setcounter{page}{-1}
+\begin{center}
+{\Huge \thisTitleBis}\\[1.8cm]
+{\Large \Gael}\\[0.7cm]
+{\mail{gael.induni@epfl.ch}}\\[1.5cm]
+%%{\large CRPP, EPFL}\\[6cm]
+\begin{minipage}[c]{0.52\textwidth}
+\begin{flushright}
+\includegraphics[width=3cm]{../pics/EPFL.eps}
+\end{flushright}
+\end{minipage}
+\hspace{1cm}
+\begin{minipage}[c]{0.4\textwidth}
+\begin{flushleft}
+\includegraphics[width=1.5cm]{../pics/CRPP_Logo.eps}
+\end{flushleft}
+\end{minipage}
+\end{center}
+\vspace{2cm}
+\begin{center}
+Master's thesis
+\end{center}
+\vspace{3cm}
+\begin{flushright}
+\large Supervisor:\\
+Olivier Sauter\\
+{\small \mail{olivier.sauter@epfl.ch}}
+\end{flushright}
+\vfill
+\begin{center}
+\today
+\end{center}
+\end{titlepage}
+\cleardoublepage
+%% }}}1
+%% Abstract {{{1
+\pagestyle{fancy}
+\renewcommand{\thepage}{\Roman{page}}
+\setcounter{page}{1}
+\setlength{\parskip}{0.5ex}
+\include{abstract}
+\cleardoublepage
+%% }}}1
+%% TOC {{{1
+\setlength{\parskip}{0ex}
+\tableofcontents
+\thispagestyle{fancy}
+\setlength{\parskip}{0.5ex}
+\cleardoublepage
+\renewcommand{\thepage}{\arabic{page}}
+\setcounter{page}{1}
+%% }}}1
+%%
+\include{intro}
+%%
+\include{mhd}
+\include{confinement}
+\include{implementation}
+\include{simulations}
+%%
+\include{conclusion}
+%%%% REMOVE THIS BEFORE SENDING {{{1
+%\section*{Personal notes}
+%\input{notes.tex}
+%% }}}1
+%%
+%%%%%%%%%%%%% CHAPTER %%%%%%%%%%%%% {{{1 Bibliography
+\nocite{*}
+\renewcommand{\refname}{Bibliography}
+%\bibliographystyle{plainnat}
+\bibliographystyle{ieeetr}
+%\bibliographystyle{nar}
+%\bibliographystyle{phcpc}
+%\bibliographystyle{phjcp}
+\bibliography{pdm}
+%% }}}1
+%%
+\include{acknowledgements}
+%%
+%%% Appendices %%% {{{1
+\newpage
+\appendix
+\include{data}
+\include{sbr}
+\include{graphs}
+%% }}}1
+%%
+\end{document}
+%%

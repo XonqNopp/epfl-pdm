@@ -1,0 +1,5 @@
+C PSIS []:  int(1/q-1)  cylindrical helical flux
+C
+	  IF(J.EQ.1) PSIS=0.D0
+	  PSIS=PSIS+(MU(J)-1)*HRO
+	

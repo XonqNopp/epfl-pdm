@@ -1,0 +1,305 @@
+!Template for ASTRA for AUG Ramp U/D studies
+!Emil -2009-
+!Transport equations are solved in r/a but input profiles are given in rho_vol,
+!and in the interface are plotted versus rho_tor (rho of astra). All profiles created
+!in astra downstairs are now done in RHO (rho_tor)
+
+!GENERAL PARAMETERS BLOCK-------------------------------------------------
+!Define equilibrium grid
+
+!Time step definiton
+
+!Constants definition
+!CV15=ZRD7X; 
+!CV16=ZRD9X;
+!CV5=0.1; CV6=0.1; FGAUSS(CV5,CV6,CAR20):;
+!CV7=0.3; CV8=0.1; FGAUSS(CV7,CV8,CAR19):;
+!CV9=0; CV10=0.1; FGAUSS(CV9,CV10,CAR5):;
+!CV2=0; FGAUSS(CV2,CV2,CAR10):; 
+!CV14=FRMAX(MU);
+!CV4=1.-ZRD10X;
+!CV12=VINT(CAR11X,ROC); CV13=VINT(CAR12X,ROC); CV1=IINT(CAR13X,ROC); CV11=IINT(CAR14X,ROC);
+!CHI1=1; CHI2=1; CHI3=1.; CHI4=1.;
+!CHE1=0; CHE2=0; CHE3=0; CHE4=0;
+
+
+!---------------------------
+!Experimental Zeff loading
+!ZEF=CIMP1*ZRD5X; !Zeff from exp avg value ZRD5X
+!ZEF=(CIMP1*ZRD5X-1.1)*(RHO/ROC)**2.0+1.1; !Zeff from exp avg value ZRD5X times a profile
+!ZEF=ZEFX+(1.D0-CIMP1)*(0.35-RHO/ROC); !Zeff from exp profile
+!ZEF=CIMP1*ZEFX; !+(1-CIMP1)*((ZRD10X-ZRD9X)*(RHO/ROC)**CF3+ZRD9X); !Zeff from exp avg value ZRD5X times a profile
+ZEF=CIMP1*ZEFX+(1-CIMP1)*((ZRD10X-ZRD9X)*(RHO/ROC)**CF3+ZRD9X); !Zeff from exp avg value ZRD5X times a profile
+!ZIM1=12; AIM1=24; !1st Impurity W ---> Tungsten
+ZIM1=CSOL3; AIM1=CSOL4; !1st Impurity O ---> Oxygen (with tungsten charge...)
+!ZIM1=6; AIM1=12; !1st Impurity C ---> Carbon
+ZEF1=ZIM1*(ZEF-1.D0)/(ZIM1-1.D0);
+AMAIN=AMJ;	ZMAIN=ZMJ;		! mass & charge of main ion species
+
+!DENSITY BLOCK------------------------------------------------------
+!Densities sources
+NNCL=0.0; !Cold neutrals
+NNWM=0.0; !Warm neutrals
+!NEUT::; 
+SNN=0.; !SNNEU;
+NE:AS; !EQ[1,ZRD2X];
+NE=NEX; 
+NEB=ZRD6X; !Electron density bnd cond
+NIBM=0; !Fast ions density
+NIZ1=NE*(ZEF-1.D0)/(ZIM1-1.D0)/ZIM1;	!density of impurity
+NI=NE*(ZIM1-ZEF+1.D0)/ZIM1;		!density of all ions
+NDEUT=NI-NIZ1;	!density of deuterium plasma ions
+!-------------------------------------------------------------------
+
+
+
+!!Power block---------------------
+!NBI heating
+!NBI::;
+
+
+PEECR=0.;
+CAR23=CF1*CAR2X+PEECR;
+
+!CRAD1=0.0;
+CAR17=(CRAD1*PROXY+CRAD2*PRWOL)*NE*NIZ1;  !Radiation power from line (oxygen) and analytic
+
+PE=POH+CAR23+CF2*PEBM-PBRAD-PEICL-CAR17;  
+PI=CF2*PIBM+CAR3X+PEICL; !CAR3X NBI power from exp file only for ions
+
+PRAD=PBRAD+CAR17;
+
+!
+!CBND3=CF2*VINT(PIBM,ROC);
+!CBND4=CF2*VINT(PEBM,ROC);
+!
+------------------------------------
+
+
+
+
+
+!TRANSPORT BLOCK-----------------------------------------------
+!Transport models
+
+
+!GLF161A::; !Gyro-Landau-Fluid model (latest version)
+!CAR25="work(j,1)";
+!CAR26="work(j,2)";CAR27="work(j,3)";
+!CF9=0.0001;CF3=0.0001;
+!SMEARR(CF9,CAR25,):; CAR18=FTAV(,CF3);
+!SMEARR(CF9,CAR26,CAR31):; CAR7=FTAV(CAR31,CF3);
+!SMEARR(CF9,CAR27,CAR32):; CAR22=FTAV(CAR32,CF3);
+
+
+!============== Transport model based on 0D scaling =========================
+!ZRD15=1.e-6+VINT(CAR4X,ROC);
+!CF14=VINT(CAR23,ROC);
+!CAR3z=CF2*PEBM;
+!CAR31=CF2*PIBM;
+!CAR32=POH;
+!CV3=VINT(CAR3z,ROC)+VINT(CAR31,ROC)+CF14+VINT(CAR32,ROC);  ! Total input power
+!CV1=THQ99/CV3**0.69;                        ! tau_E(99) scaling for ELMy H-mode
+!CV2=TAUEB;                      ! tau_E, calculated confinement time
+!CV5=(WIB+WEB)/CV3;                              ! tau_E_instant=W/P_input
+
+
+!HE=CSOL1*CAR1X;  !Input from exp file
+!XI=CSOL2*HE;
+
+
+!scaling law
+!--------------------------H98------------------------------------------------
+CF8=0.98;				! Rechengrenze Transportglg.
+CAR5=1.D0;					! 1-Array
+!Wdot:
+CAR9 = PE+PI; ! Total power
+ZRD21 = TIMDER(WTOTB)  !dW/dt
+ZRD18 = VINT(CAR9B); 
+ZRD28 = MAX(1.0e-4,ZRD18);
+!multiplication factor:
+ZRD22 = CF5*0.9*2.0*1.78e5*ABC**2.0 ! CF5 is H98 normalisation i.e. 0.5 =5.500E-01 
+ZRD22 = ZRD22*IPL**(-0.93)*BTOR**(-0.15)*NELA(NA1)**(-0.41);
+ZRD22 = ZRD22*ZRD28**0.69;
+ZRD22 = ZRD22*RTOR**(-1.97)*(ABC/RTOR)**(-0.58);
+ZRD22 = ZRD22*ELON(NA1)**(-0.78)*2**(-0.19);
+!!tau98y:
+ZRD15 = 0.0562*IPL**0.93*BTOR**0.15*NELA(NA1)**0.41*ZRD28**(-0.69);
+ZRD15 = ZRD15*RTOR**1.97*(ABC/RTOR)**0.58*ELON(NA1)**0.78*2**0.19;
+!H98Y:
+ZRD7 = ZRD22*(WTOTB/ZRD28)/(ABC**2.0*1.0e4);
+ZRD40=0.5
+!smoothfacprop:
+CF6=1;
+CAR22 =CF6*exp(-4*(1-RHO/ROC));     !!!--- CF6 in log oh_22110_h98 auf 1 gesetzt---
+NNCX=1;			!Numbers of Iterations
+ZRD9=WTOTB/ZRD28;   !tau
+!Calculation of HE:
+!HE=CAR22*ZRD27;   
+
+
+coptanGP(CAR7,CAR8,CAR9,CAR10):;
+HE=CSOL1*CAR7+HNGSE; !Coppi-Tang+neoclassical
+XI=CSOL1*CSOL2*CAR7+HNASI;  !Coppi-Tang+neoclassical
+
+
+!Bohm Gyrobohm mit Bergrenzung
+!CAR8=1.6*HABM+1.0*HAGB;
+!CAR9=min(CAR8,50.d0);
+!CAR10=max(CAR9,5.d-2);
+!HE=CAR10;
+
+
+!HE=HANAL; ! Neo-Alcator
+
+
+!HE=HAALC; ! Alcator
+
+
+!HE=HNGSE+0.25*(1.6*HABM+1.0*HAGB); !Bohm-Gyrobohm+neoclassical
+
+
+!Neoclassical contributions
+!XI=HNASI;
+!HE=HNGSE;
+
+
+!Transport coefficients other than HE
+CE=0.0;
+XE=0.0; 
+DN=0.0; 
+CN=-VP*VRAS; !Ware pinch neoclass elec (+ THD)
+HI=0.0; CI=0.0; DI=0.0;   
+HN=0.0; XN=0.0; 
+DE=0; 
+
+!H-factors
+TNA=TAUNA;
+HNA=TAUEE(ROC)/TAUNA;
+
+!-------------------------------------------------------------
+
+
+!Bootstrap coefficients
+!CAR29=max(0,-DCSA*GRAD(NE)/NE-HCSA*GRAD(TE)/TE-XCSA*GRAD(TI)/TI);
+!HC=CIMP3*HCSA*CAR29/(CAR29+1.e-6); 
+!DC=CIMP3*DCSA*CAR29/(CAR29+1.e-6); 
+!XC=CIMP3*XCSA*CAR29/(CAR29+1.e-6); 
+HC=CIMP3*HCSA; 
+DC=CIMP3*DCSA; 
+XC=CIMP3*XCSA; 
+
+!Plasma rotation
+VPOL=VPSWW; !Poloidal rotation
+VTOR=VTORX; !Toroidal rotation
+ER=BTOR*(VDIA-VPOL)+BTOR*AMETR*MU*VTOR/RTOR;
+
+
+!TEMPERATURE BLOCK-------------------------
+!Initial condition for temperatures 
+TE=TEX;
+TI=TIX;
+!Transport equations for temperatures
+TE:AS;!EQ[1,ZRD2X];
+TEB=ZRD7X; 
+TI:EQ[1,ZRD2X];
+TIB=ZRD8X; 	
+!-----------------------------------------
+
+
+
+!CURRENT BLOCK-----------------------------
+CC=CNSA; !Conductivity
+
+CU:EQ; 
+
+CD=CIMP4*(CAR4X+CF2*CUBM); !CD source from exp+NBI
+
+IPL=IPLX;  !(1+(1-FRAMP(0,0.1))*(CFUS3-1))*IPLX;  !Total plasma current fixed from experimental value
+!UEXT=ZRDX1;
+MU=MUX;!(1+FLIN*(CFUS3-1))*MUX; !Initial q-profile (exp value)
+
+CF11=ABS((FRMIN(UPL)-FRMAX(UPL))/FRMIN(UPL));  !Steady-stateness factor
+!------------------------------------------
+
+!Time step control
+TSCTRL(QI,QE,QN,0.5):;
+
+!Definition of various quantities to be saved
+WOUTP:CV1:CV2:CV3:;
+CSAW1  =  1.000E+00;
+CSAW2  =  1.000E+00;
+CSAW3  =  1.000E+00;
+ASTSAW(1,CSAW1,CSAW2,CMHD1,CSAW3)::::;
+!MIXINT(0,100):0.0001:::;
+
+!Plotting radial profiles
+
+!Pag1
+Te\TE\\TEX\-2; Jpar\CU\-4; Chie\HE\\CAR1X\-19; Pein\PE+(CRAD1*CAR17+PBRAD)\-121;
+q\1./MU\-21; Ecrh\CAR23; ne\NE\\NEX\-5; Qe\QE\-6;
+
+Ti\TI\\TIX\-2; Jbs\CUBS\-4; Chii\XI\-19; Prad\-(CRAD1*CAR17+PBRAD)\-121;
+shir\SHEAR; Zef\ZEF\\ZEFX\10; ni\NI\-5; Qi\QI\-6;
+
+!Pag2
+gamm\"work(j,10)"\-321; pss\PSIS; Utor\UPL\-7; Vpnc\CN;
+Chii\XI\-9; Dn\DN; rhos\RHOS; nu\NUES;
+
+freq\"work(j,12)"\-321; Vpol\VPOL; Upar\ULON\-7; Er\ER;
+\\; DnAn\CAR22; Qn\QN; psi\FP;
+
+!Pag3
+Johm\CUOHM\-4; taue\TAUEE; AnEq\"work(j,7)"\-124; de\-DE;
+we\WE; Pohm\POH; cc\CC; \\;
+
+grdr\GRADRO; he_n\HNGSE; Eq\PEICL\-124; iLTi\1./LTI\50;
+lint\LINT; ipol\IPOL; \; iLTe\1./LTE\50;
+
+!Pag4
+Bmax\BMAXT;  \\; EqEn\PEICL; nue\NUES;
+nuee\NUEE; ha\HARL; dTe\ABS(TE-TEX)/TEX*100; Bdb0\BDB0;
+
+\; \; \; \;
+\; \; \; \;
+
+!Pag5
+TNa\TAUNA; Hna\TAUEE/TAUNA; \; Pec1\CAR11;
+Xn\CV5/CV1; T99\CV1; Tau\CV5; Pec2\CAR12;
+
+T98\TLQ97; H98\TAUEE/TLQ97; \; \;
+\; \; \; \;
+
+!Pag6
+Qen\(QE/NE*TE)\-531; \; \; Pnbe\CF2*PEBM\-431;
+\; \; \; Pnbi\CF2*PIBM\-432;
+
+Qin\(QI/NI*TI)\-531; \; \; Peot\POH+CAR23-PEICL\-431;
+\; \; \; Piot\PEICL\-432;
+
+!Page 7
+Jcd\CD; Pbls\CF2*(1-PEBM-PIBM); \; \;
+\; \; \; \;
+
+\; \; \; \;
+\; \; \; \;
+
+
+!Plotting Time Traces
+Te0_TE(0); Teb_TEB; Ti0_TI(0); Tib_TI(ROC); TeTi_TE(0)/TI(0);
+Teib_TE(ROC)/TI(ROC); neb_NE(ROC); q0_1./MU(0); QeB_QEB;
+q1_1./MU(ROC); qmin_1./CV14; Zef_ZEF(0); Ipl_IPL; Icd_ICD(ROC); 
+Ibs_IBS(ROC); Iohm_IOHM(ROC); Itot_ICD(ROC)+IBS(ROC)+IOHM(ROC);   
+Ecrh_VINT(CAR23,ROC); SawT_0.01; Pnbe_VINT(CAR11, ROC);
+Pnbi_VINT(CAR12, ROC); Pin_VINT(CAR23,ROC)+VINT(CAR11, ROC)+VINT(CAR12, ROC);
+Ptot_CV3; H99_CV5/CV1; Pnbi_CBND3; Pnbe_CBND4;
+tauG_TAUEE(ROC); taue_CAR1(ROC); taui_CAR21(ROC); tauE99_CV1; NPe_VINT(NE,ROC);
+We_WE(ROC); Wi_WI(ROC); Vlup_UPL(ROC); abc_AMETR(ROC);
+abct_CAR9X(ROC); stst_CF11;  g2_G22(ROC);
+XeN_CV5/CV1; Pech_CF14; Pebf_CBND4/CBND2; Pibf_CBND3/CBND2; Plbf_(CBND2-CBND3-CBND4)/CBND2; tae1_CV5 ;
+tae2_CV1 ; ta12_CV5/CV1; wei_(WEB+WIB); cv31_CV3**0.31; we3_(WEB+WIB)/(CV3**0.31); cv3_CV3; 
+h98y_ZRD7; pow_ZRD28; fax_ZRD27; lint_LINT(ROC);
+!-------------------------------------------------------------------------------------------------------
+
+
+

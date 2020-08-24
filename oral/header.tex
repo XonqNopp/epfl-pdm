@@ -1,0 +1,89 @@
+\usefonttheme[onlymath]{serif}
+%%% Document variables %%% {{{1
+\newcommand{\Gael}{Ga\"el Induni}
+\newcommand{\thisAuthors}{\Gael}
+\newcommand{\thisTitle}{Theoretical study of electronic transport in TCV ELMy H-mode}
+\newcommand{\thisTitleSHORT}{\thisTitle}
+%%% End of document variables %%% }}}1
+%%% Usepackages %%% {{{1
+\usepackage{graphicx}
+%\usepackage{subfigure}% For beamer presentation, subfig is not compatible yet
+\usepackage{float}
+\usepackage{amsmath}
+%\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{color}
+\definecolor{dgreen}{rgb}{0,0.4,0}
+\definecolor{magenta}{rgb}{1,0,1}
+\newcommand{\Red}[1]{\textcolor{red}{#1}}
+\newcommand{\Blue}[1]{\textcolor{blue}{#1}}
+\newcommand{\Black}[1]{#1}
+\newcommand{\DGreen}[1]{\textcolor{dgreen}{#1}}
+\newcommand{\Magenta}[1]{\textcolor{magenta}{#1}}
+%\usepackage{everysel}
+\usepackage{ragged2e}
+%\usepackage{gensymb}
+%\usepackage{marvosym}
+\usepackage{wasysym}
+%\usepackage{nicefrac}
+\usepackage[english]{babel}
+%\usepackage{multimedia}
+%%
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{caption}[numbered]
+%%
+%\usetheme{CambridgeUS}
+%\usetheme{Pittsburgh}
+%\usetheme{Berkeley}
+%\usetheme{Goettingen}
+%\usetheme{Marburg}
+%\usetheme{Boadilla}
+%\usetheme{Madrid}
+\usetheme{CRPP}
+%%
+\hypersetup{
+     colorlinks        = false,
+     bookmarks         = true,
+     linkcolor         = red,
+     urlcolor          = blue,
+     filecolor         = blue,
+     citecolor         = green,
+	 dvips,
+     pdfinfo           = {
+          title           = {\thisTitle},
+          author          = {\Gael},
+          subject         = {\thisTitle},
+          displaydoctitle = true,
+		  toolbar         = false,
+          keywords        = {plasma} {transport} {diffusion} {H-mode} {pedestal} {ELM} {MHD} {ASTRA} {simulation}
+     }
+}
+\newcommand{\mail}[1]{\href{mailto:#1}{#1}}
+\newcommand{\ftplink}[1]{\href{ftp://#1}{#1}}
+\newcommand{\myurl}[1]{\href{#1}{#1}}
+%%% End of usepackages %%% }}}1
+%%% New commands %%% {{{1
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\newcommand{\avg}[1]{\left\langle #1 \right\rangle}
+\newcommand{\dd}{\textrm{d}}
+\newcommand{\ddsd}[2]{\dfrac{\dd #1}{\dd #2}}
+\newcommand{\Par}{/\!/}
+\renewcommand{\epsilon}{\varepsilon}
+%\makeatletter
+%\newcommand{\rom}[1]{\expandafter\@slowromancap\romannumeral #1@}
+%\makeatother
+\renewcommand{\roman}{\Roman}
+\newcommand{\blanknote}{\note{\emph{Blank note to keep page layout good.}} }
+%%% End of new commands %%% }}}1
+%%
+\numberwithin{equation}{section}
+\setcounter{tocdepth}{1}
+\hyphenation{}
+%%% Title page %%% {{{1
+\title{\thisTitle}
+\date{February 11, 2011}
+\author{\thisAuthors}%\\{\small \mail{gael.induni@epfl.ch}} }
+%%% End of title page %%% }}}1
+\institute{CRPP, EPFL}
+\logo{\includegraphics[width=1cm]{../pics/EPFLno.eps}}
+

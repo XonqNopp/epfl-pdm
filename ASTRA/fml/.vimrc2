@@ -1,0 +1,2 @@
+autocmd BufReadPost,BufNewFile * set filetype=fortran
+autocmd BufReadPost .vimrc2 set filetype=vim

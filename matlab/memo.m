@@ -1,0 +1,12 @@
+rhos = loadascii('datafiles/rhos_40080_0.8.mat');
+t_i  = loadascii('datafiles/ti_40080_0.8.mat');
+tcrash;
+raargs.tELM=tELM;
+plot_rhoOK(astra_out,qq,t_crash,deltaELM,t_i,rhos);
+fina=change_fns(filenames,0,'X3onlyNoST');
+raargs.rhos = loadascii('datafiles/rhos_40080_0.8.mat');
+raargs.tis  = loadascii('datafiles/ti_40080_0.8.mat');
+raargs.filenames=fina;
+ra=resultsargs(raargs);
+view_traces(ra);
+view_many_traces(ra);

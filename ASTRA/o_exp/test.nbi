@@ -1,0 +1,136 @@
+!NBI configuration file for 29475 at 1 second
+!
+!
+!
+!Name 	Description
+!CNB1 	A number of NBI sources (a number of pencil beams)
+!CNB2 	Explicit (=1) or implicit (=0) account for the charge exchange losses
+!CNB3 	Space grid for NBI routine N1=(NA1-1)/CNB3+1
+!CNB4 	Steady state (=1) or time dependent (=2) Fokker-Planck solver
+!CNBI1 	Fast ion charge exchange losses due to cold neutrals
+!CNBI2 	Fast ion charge exchange losses due to NBI neutrals
+!CNBI3 	FP solver time step: tNBI = CNBI2*TAU
+!CNBI4 	FP solver velocity grid size: IV1=80/CNBI4+1
+!
+!The first parameter gives the power injected by each beam source. 
+!This quantity is usually time dependent, therefore, it is convenient 
+!to set it as a variable rather than as a number. In the example (90), 
+!this variable is ZRD1 = ZRD1X and its time evolution can be prescribed
+!in the data file (Section 5.3.3). Similarly, the number of partial thin 
+!beams 8 which represent the pencil beam is an adjustable parameter that 
+!can be varied interactively (CF1 in example (90).
+!
+!The 9-th parameter in Table 4.31 also requires more explanations. 
+!This parameter defines how the power of a fast ion is deposited in 
+!the plasma:
+!  = 0 no averaging (deposition at the birth point),
+!  = 1 averaging with a finite orbit width,
+!  = 2 averaging with zero orbit width.
+!
+!The last 10 parameters in Table 4.31 define the geometry of every pencil 
+!beam. The neutral beam is characterized, first of all, by its ``footprint'',
+!i.e. the cross-section of the beam with the plane including the major torus 
+!axis and orthogonal to the beam axis projection onto the midplane. In turn, 
+!the footprint represented as a rectangle is given by four parameters: the 
+!rectangle center (parameter No.~11), major radii of two vertical sides 
+!(parameters 12 and 13) and by the aspect ratio that is defined as ratio of 
+!the rectangle height to its width. Secondly, by the inclination of the beam 
+!axis with respect to the midplane (parameter No.~14), and, thirdly,9 by the 
+!power distribution across the beam axis. The power distribution is described 
+!by two Fortran functions, NBFHZ and NBFRY, in the vertical and in the 
+!horizontal cross-sections, respectively. Each function has two free 
+!parameters which are the first four parameters in the last line of example 
+!(90) (or parameters 16, 17, 18, 19 in Table 4.31). Both functions are 
+!included in the file AWD/sbr/nbuser.f and can be arbitrarily modified by 
+!the user to prescribe any power distribution required.
+!
+!The NBI configuration file can either be created by the user from 
+!scratch or adjusted by editing one of the files of this type provided 
+!with the code. Another option is interactive creating/modification during
+!the Astra run. The code enters in the interactive regime whenever
+!-- the NBI configuration file does not exist,
+!-- the parameter CNB1 takes a negative value,
+!-- the parameter CNB1 changes its value during the run.
+!In all cases, a dialog window pops up and the user can adjust all input 
+!parameters for all beam sources. As before, assume that the input data file 
+!is aug10000, (the full name of the file being AWD/exp/aug10000). If neither 
+!aug10000.nbi nor aug.nbi exist in the directory AWD/exp/ then a new file 
+!AWD/exp/aug10000.nbi will be created on exit from the dialog window. The new 
+!(or modified) data file will then be used in the subsequent simulations. The 
+!total number of sources is defined as the absolute value | CNB1 | . Note also 
+!that if the actual number of records in the file is larger than expected due 
+!to | CNB1 | then the excessive records are ignored. The opposite case and 
+!CNB1 = 0 are treated as an error.
+!
+!The NBI routine provides the following output. 
+!
+!
+!PARAMETERS after ordinal number
+!#
+!1 	[MW] 	Pencil beam power
+!2 	-- 	Counter injection fraction (0 for co-, 1 for counter-injection)
+!3 	-- 	Mass of the beam ions in the proton mass (can be 1,2,3)
+!4 	-- 	Charge of the beam ions in the proton charge units
+!5 	-- 	Maximum beam energy
+!6 	-- 	Power fraction of the full (maximum) energy component
+!7 	-- 	Power fraction of the one half energy component
+!8 	-- 	Power fraction of the one third energy component
+!9 	-- 	Type of averaging over the fast ion orbits
+!10 	-- 	Number of thin beams in the horizontal plane
+!11 	[m] 	Vertical shift in the beam footprint centre
+!12 	[m] 	Maximum major radius in the beam footprint
+!13 	[m] 	Minimum major radius in the beam footprint
+!14 	-- 	tan a, a being the angle between the beam axis and the midplane
+!15 	-- 	Footprint aspect ratio
+!16 	-- 	These 4 parameters prescribe the beam power distribution across the
+!17 	-- 	pencil beam. The parameters are transferred to the user defined 
+!					functions
+!18 	-- 	NBFHZ and NBFRY (see the file AWD/sbr/nbuser.f) under the names
+!19 	-- 	CVER1, CVER2, CHOR1, CHOR2, respectively
+!20 	-- 	Unused parameter
+!
+!OUTPUTS
+!Parameter 	Units 	Description
+!CUBM 	[MA m-2] 	NB driven current
+!CUFI 	[MA m-2] 	Current of the fast ions
+!NIBM 	[1019 m-3] 	Density of the suprathermal ions
+!NNBM1 	[1019 m-3] 	Density of neutrals with the full energy EBEAM
+!NNBM2 	[1019 m-3] 	Density of neutrals with the half energy EBEAM/2
+!NNBM3 	[1019 m-3] 	Density of neutrals with the energy EBEAM/3
+!PBEAM 	[MW m-3] 	Total beam power absorbed
+!PBLON 	[1019 keV m-3] 	Longitudinal pressure due to fast ions
+!PBPER 	[1019 keV m-3] 	Perpendicular pressure due to fast ions
+!PEBM 	[MW m-3] 	Beam power absorbed by electrons
+!PIBM 	[MW m-3] 	Beam power absorbed by ions
+!SCUBM 	[kg s-2m-2] 	Source of the toroidal momentum
+!SNEBM 	[1019m-3s-1] 	Source of electrons due to NBI
+!SNIBM1 	[1019m-3s-1] 	Birth rate for ions with the energy EBEAM
+!SNIBM2 	[1019m-3s-1] 	Birth rate for ions with the energy EBEAM/2
+!SNIBM3 	[1019m-3s-1] 	Birth rate for ions with the energy EBEAM/3
+!SNNBM 	[1019m-3s-1] 	Source of thermal neutrals
+!
+!Begins
+
+1
+CNBI1      
+0.0 	
+2.0 	
+1.0 	
+25.0
+0.68
+0.24
+0.08 	
+1.0000E+00 	
+1
+0.0 	
+0.88
+0.88 	
+0.0 
+1.0000E+00
+1.0000E+00 
+1.0000E+00 	
+1.0000E+00 	
+1.0000E+00 	
+0.0000E+00
+
+

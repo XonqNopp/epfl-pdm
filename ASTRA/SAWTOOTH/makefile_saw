@@ -1,0 +1,18 @@
+#Substitute 'xlf95 -qsuffix=f=.f90' with your Fortran 90 compiler if needed
+
+ifort  -c prec_rkind.f90
+ifort   -c   pref_const.f90
+ifort    -c  params_const.f90 
+ifort    -c  varlaprout.f90
+ifort    -c  varlaprout2.f90
+ifort   -c   cbsplgenpkg.f90
+ifort   -c   interpos.f90
+ifort   -c   saw_crit.f90  
+ifort   -c   saw_idmhd.f90 
+ifort   -c   saw_resknk.f90  
+ifort  -c    saw_fast.f90 
+ifort   -c   saw_KO.f90 
+ifort   -c   saw_psispar.f90
+ifort  -c    postcrash.f90  
+
+#ar -rv sawtooth_ar *o

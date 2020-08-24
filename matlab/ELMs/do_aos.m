@@ -1,0 +1,9 @@
+astra_out_std=loadastraHD(filenames.std,filenames.dir);
+astra_out_small=loadastraHD(filenames.small,filenames.dir);
+astra_out_wide=loadastraHD(filenames.wide,filenames.dir);
+astra_out_std.name='std';
+astra_out_small.name='small';
+astra_out_wide.name='wide';
+aos(1)=astra_out_std;
+aos(2)=astra_out_small;
+aos(3)=astra_out_wide;

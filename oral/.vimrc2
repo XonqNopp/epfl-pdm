@@ -1,0 +1,5 @@
+autocmd BufReadPost * syntax match texComment "%.*" contains=@NoSpell
+autocmd BufRead *.log %s/\([^.]\)\n\([^\n]\)/\1\2/g
+autocmd BufRead *.log %s/\[\([0-9]\+\)\n\+\]/[\1]\r/g
+autocmd BufReadPost pdm_GaelINDUNI_notes.tex map <buffer> <f1> :w<cr>:!make previewN<cr><cr>
+autocmd BufReadPost pdm_GaelINDUNI_slides.tex map <buffer> <f1> :w<cr>:!make previewS<cr><cr>

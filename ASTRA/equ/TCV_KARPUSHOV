@@ -1,0 +1,150 @@
+! TCV model for NBI heating modelling, ref.#29475 
+!                             CRPP,AK, 30.06.2010
+
+! --- General parameters ---
+NEQUIL = 41; ! Equilibrium radial grid (<=41)
+
+! Time step definition and control
+TSCALE = 1;                       ! Time axis scale length (modes 6 and 7)
+DROUT  = 0.003;                   ! [sec] Time interval for profile redrawing (modes 1, 2 and 3) 
+TAUMIN = 0.0003; TAUMAX = 0.0003; ! Min/Max time step (TAU)
+
+! --- NBI heating ---
+!NBI:0.005:;
+CNB1=1;    ! No. of NB sources
+CNB2=0;    ! bulk-ion CX losses:  1/0 on/off
+CNB3=0;    ! NBI space grid: N1=(NA1-1)/CNB3+1
+CNB4=2;    ! 1(2) steady st. (time dep.) FP solver
+!	     the next 4 parameters are effective if CNB4=2 only
+CNBI1=1;   ! fast-ion CX losses due to cold neutrals
+CNBI2=1;   ! FP solver time step: TAUNBI=CNBI2*TAU	
+CNBI3=1;   ! fast-ion CX losses due to NBI  neutrals
+CNBI4=0;   ! FP solver velocity grid: IV1=80/CNBI4+1
+
+! --- ECH heating input (or any other for electrons) ---
+CAR18=ZRD8*CAR8X;                           ! ECRH power density [MW/m^2] (CAR8X)
+
+! --- Experimental electron heat conductivity input ---
+CAR17=ZRD8*CAR10X+(1.0-ZRD8)*CAR11X;        ! Chi_e experiment for X3 (CAR10X) and OH (CAR11X) tested without correction for CC=CNSA+CCMHD
+
+! --- Poloidal  flux (plasma current) block ---
+! "Neoclassical Conductivity Sauter, Angioni, Lin-Liu" + "Conductivity anomalous due to sawtooth oscillations" 
+CC=CNSA+CCMHD;
+CU:EQ; 	           ! Solve Transport equations for poloidal flux
+IPL=IPLX;          ! Total plasma current fixed from experimental value
+MU=MUX;            ! Initial q-profile (exp value)
+DC=DCSA; HC=HCSA; XC=XCSA;       ! for bootstrap current density
+
+! --- Plasma density block ---
+NE=ZRD6*NEX;   ! Electron density from data file
+!Z-effective
+AMAIN=2; ZMAIN=1;                    ! mass & charge of main ion species
+AIM1=12; ZIM1=6;                     ! 1st Impurity mass & charge (Carbon)
+ZEF=FIXVAL(ZRD1X,0.0000001);
+NIZ1=NE*(ZEF-1)/(ZIM1-1)/ZIM1;       ! Carbon density      
+NI=NE*(ZIM1-ZEF+1)/ZIM1;
+NDEUT=NI-NIZ1;                       ! Deuteruium density
+
+! --- Electron and ion temperature block ---
+TI*:;	TI=ZRD5*TIX;  TIB=ZRD3; ! Solve Transport equation for a<ab, 
+TE*:;	TE=ZRD4*TEX;  TEB=ZRD2; ! Solve Transport equation for a<ab, 
+! --- Electron and ion Power balance ---
+PE=POH+PEBM+CAR18;    ! OH, NB->electrons, ECH(exp), e->i power
+PI=PIBM-PBICX;        ! e->i power, NB->ions, CX losses
+
+! --- Neutrals block ---
+!NNCL=1e-9; NNWM=1e-9;
+NNCL=0.0;   NNWM=0.0;
+!NNCL=5.e-4;   NNWM=5.e-4;
+ENCL=2.e-3;   ENWM=2.e-2;
+NEUT::;
+SNN=SNNEU; ! Particle source for NE transport calculation 
+
+! --- Plasma rotation block ---
+VPOL=VPSWW; !Poloidal rotation
+VTOR=VTORX; !Toroidal rotation
+ER=BTOR*(VDIA-VPOL)+BTOR*AMETR*MU*VTOR/RTOR;
+
+! --- Power and energy from functions to vectors ---
+CAR20=PE;
+CAR21=PI;
+CAR22=POH;
+CAR23=PEICL;
+CAR24=PRAD;
+CAR25=PBICX;
+CAR26=WTOT;
+CAR27=WE+WI;
+CV1=VINT(PIBM,ROC);
+CV2=VINT(PEBM,ROC);
+CV3=ZRD9X;
+CV4=ZRD10X;
+CV9=VINT(CAR25,ROC);
+
+! --- Confinement scalings ---
+CF8=ZRD7*ROC;                                                       ! \rho max for power integration
+CF9=VINT(CAR22,CF8)+VINT(CAR18,CF8)+VINT(PBEAM,CF8);                ! P_input=Poh+Pech+Pnb
+!CF9=VINT(CAR22,CF8)+VINT(CAR18,CF8)+VINT(PIBM,CF8)+VINT(PEBM,CF8); ! P_input=Poh+Pech+Pnbi+Pnbe
+CF10=max(1.e-9,CF9);                                   
+CF11=CAR27(CF8)/CF10;         ! tau_E_instant=Wpl/P_input (in model)
+CF12=THQ99/CF10**0.69;        ! tau_E(99) scaling for ELMy H-mode
+!CF13=TLQ97/CF10**0.73;        ! tau_E(97) scaling for L mode
+
+! --- Transport coefficients ---
+!IFSPPL(CAR1,CAR2,CAR3,CAR4,CAR5,CAR6);                 ! ISF/PPPL transport model for chi_i & chi_e
+! RLTcrit:  R/L_Tcrit for ITG mode
+! RLTcritz: R/L_Tcrit for carbon branch
+! g:        L_Tc/L_T, where L_Tc is the critical temperature gradient scale length for the deuterium branch of the ITG mode
+! gamma:    linear growth rate (see comment at the end)
+! chi_i:  Anomalous ion thermal diffusivity from toroidal ITG mode
+! chi_e:  Anomalous electron thermal diffusivity from toroidal ITG mode
+!CAR31=CAR5; ! chi_i from IFSPPL 
+!CAR32=CAR6; ! chi_e from IFSPPL 
+
+CV10=0.05; ! Time [sec] constant for chi_e & chi_i averaging
+CV11=0.1;  ! Time [sec] to start power scaling control
+CAR28=FTAV(HE,CV10); ! chi_e time averaging
+CAR29=FTAV(XI,CV10); ! chi_i time averaging
+
+! --- Adjustment of transport coefficients ---
+CF14=CF11/CF12;    ! Ratio of tauEexp/tauE(99)
+HE=CF14*(FJUMP(CV11)*CAR28+(1.0-FJUMP(CV11))*CAR17);   ! Electron heat conductivity 
+XI=HNASI;   ! Ion heat conductivity "Neoclassical Angioni and Sauter Ion"	
+DN=0.0; HN=0.0; XN=0.0; 
+DE=0.0; XE=0.0;  
+DI=0.0; HI=0.0; 
+CN=0.5*GRAD(TE)/TE*GRADRO;
+CE=0.0; CI=0.0;
+
+!AKOUT:0.05:0.05:3.5:; ! creates output files in directory defined in astra/dirresultsin ( forexample dat/tcvsimdat/AKOUT/)
+
+! Radial profiles output
+! 1-st page main parameters
+Te\TE\-1;	Ti\TI\-2;	ne\NE\-3;	q\1./MU\-4;
+Pech\CAR18\-5;	Pibm\PIBM\-6;	Peic\PEICL\-7;	Jp\CU\-8;
+Tex\TEX\-1;	Tix\TIX\-2;	ni\NI\-3;	qx\1./MUX\-4;
+Poh\POH\-5;	Pebm\PEBM\-6;	Piec\-PEICL\-7;	Jbs\CUBS\-8;
+
+! 2-nd page transport coefficients
+Xe\HE\-21;		Xi\XI\-18;	Xi\XI\-18;		Xi\XI\-17;		
+Xe\HE\-21;		Xi\XI\-18;	Xi\XI\-18;		Xi\XI\-18;		
+Xi\XI\-21;		ASI\HNASI\-18;	ASC\HNASC\-18;	 	CHI\HNCHI\-17;		
+Xe0\CAR17\-21;		atli\HATLI\-18;	ngsi\HNGSI\-18;		npsi\HNPSI\-18;	
+
+! 3-d page aux
+ne\NE\-31;	ne\NE\-31;	ne\NE\-31;	ne\NE\-31;
+non\NN;		To\TN;	 	Jp\CU\-35;	Jp\CU\-35;
+ni\NI\-31;	nf\NIBM\-31;	\;		\;
+\;		\;		Jbm\CUBM\-35;	Jfi\CUFI\-35;
+
+! Time traces output
+Te0_TE(0);	Ti0_TI(0);	Teb_TE(ROC);	Tib_TI(ROC);	TeTi_TE(0)/TI(0);
+ne0_NE(0);	neb_NE(ROC);	ni0_NI(0);	Zeff_ZEF(0);
+q0_1./MU(0);	qb_1./MU(ROC); 	Ipl_IPL;	
+We_WE(ROC);	Wi_WI(ROC);
+Poh_VINT(CAR22,ROC);	Pech_VINT(CAR18,ROC);	
+Enb_CV4;	Pbi_CV3;	Pnb_VINT(PBEAM, ROC);	Pnbi_CV1; 	Pnbe_CV2;	Pnbl_VINT(PBEAM, ROC)-CV1-CV2;
+Pei_VINT(CAR23, ROC); 	Pcx_CV9;  	Prad_VINT(CAR24,ROC);
+tauE_CF11;	tH99_CF12;	k99_CF14;	tL97_CF13;
+Icu_IINT(CU, ROC);	Ibm_IINT(CUBM, ROC);	Ifi_IINT(CUFI, ROC);	
+
+! vim: readonly:
